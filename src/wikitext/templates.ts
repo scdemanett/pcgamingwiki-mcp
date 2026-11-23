@@ -3,6 +3,7 @@
  * shapes the tools will return in wikitext mode.
  */
 import { type Node, type Template, named, normalizeName, parse, positional, templates, textOf, toWikitext } from "./parse.js";
+import { renderPathToken } from "./paths.js";
 
 // ---------- text rendering ----------
 
@@ -56,7 +57,14 @@ function renderTemplate(t: Template, opts: RenderOptions): string {
   // {{store link|Store|id|Label}} → Label; {{Store feature|Xbox Game Pass}} → Xbox Game Pass
   if (t.name === "Store link") return renderText(pos[2] ?? pos[0] ?? [], opts);
   if (t.name === "Store feature") return renderText(pos[0] ?? [], opts);
-  if (t.name === "P") return renderPathToken(textOf(pos[0] ?? []));
+  if (t.name === "P" || t.name === "Path") return renderPathToken(textOf(pos[0] ?? []));
+  // Same output Module:Cargo/gamePaths gives, so paths match Cargo mode.
+  if (t.name === "LocalizedPath") return `<Localized ${renderText(pos[0] ?? [], opts)}>`;
+  if (t.name.startsWith("Infobox game/row/")) {
+    const kind = t.name.slice("Infobox game/row/".length).replace(/^taxonomy\//, "");
+    const parts = pos.map((v) => renderText(v, opts)).filter(Boolean);
+    return parts.length ? `${kind}: ${parts.join(", ")}\n` : "";
+  }
   if (t.name.startsWith("Glossary:")) return t.name.slice("Glossary:".length);
   if (/^Refurl$|^Refcheck$|^Refsnip$/.test(t.name)) {
     const title = named(t, "title");
@@ -66,18 +74,21 @@ function renderTemplate(t: Template, opts: RenderOptions): string {
   return toWikitext([t]);
 }
 
-/** `{{p|appdata}}` stays recognizable; mapping to env vars is a milestone 3 decision. */
-function renderPathToken(token: string): string {
-  return `{{p|${token.trim().toLowerCase()}}}`;
-}
 
 // ---------- sections ----------
 
 export interface Section {
   level: number;
+  /** Heading as plain text ("" for the lead). */
   heading: string;
   /** Wikitext of the section body, excluding subsections. */
   body: string;
+  /** Offset of the heading line (0 for the lead). */
+  start: number;
+  /** Offset where the body starts, just after the heading line. */
+  bodyStart: number;
+  /** Offset where the body ends (the next heading, or the end of the text). */
+  bodyEnd: number;
 }
 
 /** Split wikitext on `==Heading==` lines. Index 0 is the lead (level 0, heading ""). */
@@ -85,27 +96,43 @@ export function splitSections(wikitext: string): Section[] {
   const out: Section[] = [];
   const re = /^(={2,6})[ \t]*(.+?)[ \t]*\1[ \t]*$/gm;
   let last = 0;
-  let current: Section = { level: 0, heading: "", body: "" };
-  for (let m = re.exec(wikitext); m; m = re.exec(wikitext)) {
-    current.body = wikitext.slice(last, m.index);
+  let current: Section = { level: 0, heading: "", body: "", start: 0, bodyStart: 0, bodyEnd: 0 };
+  const close = (end: number) => {
+    current.bodyEnd = end;
+    current.body = wikitext.slice(last, end);
     out.push(current);
-    current = { level: m[1]!.length, heading: renderText(parse(m[2]!)), body: "" };
+  };
+  for (let m = re.exec(wikitext); m; m = re.exec(wikitext)) {
+    close(m.index);
     last = m.index + m[0].length;
+    current = { level: m[1]!.length, heading: renderText(parse(m[2]!)), body: "", start: m.index, bodyStart: last, bodyEnd: 0 };
   }
-  current.body = wikitext.slice(last);
-  out.push(current);
+  close(wikitext.length);
   return out;
 }
 
-/** A section's body plus all of its subsections, as wikitext. */
-export function sectionWithChildren(sections: Section[], heading: string): string | undefined {
-  const i = sections.findIndex((s) => s.heading.toLowerCase() === heading.toLowerCase());
+/**
+ * Section `index`'s body plus all of its subsections, sliced from the original
+ * wikitext (subsection headings kept as written). Index 0 is the lead alone.
+ */
+export function sectionContent(wikitext: string, sections: Section[], index: number): string | undefined {
+  const s = sections[index];
+  if (!s) return undefined;
+  let end = s.bodyEnd;
+  if (index > 0) for (let j = index + 1; j < sections.length && sections[j]!.level > s.level; j++) end = sections[j]!.bodyEnd;
+  return wikitext.slice(s.bodyStart, end);
+}
+
+/** A section's body plus all of its subsections, found by heading text (case-insensitive). */
+export function sectionWithChildren(sections: Section[], heading: string, wikitext?: string): string | undefined {
+  const i = sections.findIndex((s) => s.level > 0 && s.heading.toLowerCase() === heading.toLowerCase());
   if (i === -1) return undefined;
+  if (wikitext !== undefined) return sectionContent(wikitext, sections, i);
   const level = sections[i]!.level;
   let text = sections[i]!.body;
   for (let j = i + 1; j < sections.length && sections[j]!.level > level; j++) {
-    const s = sections[j]!;
-    text += `${"=".repeat(s.level)}${s.heading}${"=".repeat(s.level)}${s.body}`;
+    const sub = sections[j]!;
+    text += `${"=".repeat(sub.level)}${sub.heading}${"=".repeat(sub.level)}${sub.body}`;
   }
   return text;
 }
@@ -212,6 +239,8 @@ export function extractInfobox(nodes: Node[]): Infobox | undefined {
 export type PathSegment = { text: string } | { token: string };
 
 export interface GameDataPath {
+  /** Rendered as PCGW stores it in Cargo, e.g. `%APPDATA%\EldenRing\`. */
+  path: string;
   /** Path as wikitext, e.g. `{{p|appdata}}\EldenRing\`. */
   wikitext: string;
   segments: PathSegment[];
@@ -251,6 +280,10 @@ function pathSegments(nodes: Node[]): PathSegment[] {
   return segs.filter((s) => !("text" in s) || s.text !== "");
 }
 
+export function renderSegments(segments: PathSegment[]): string {
+  return segments.map((s) => ("token" in s ? renderPathToken(s.token) : s.text)).join("");
+}
+
 /** Extract Game data rows and notes from the `Game data` section's wikitext. */
 export function extractGameData(sectionWikitext: string): GameData {
   const out: GameData = { rows: [], notes: [] };
@@ -261,7 +294,10 @@ export function extractGameData(sectionWikitext: string): GameData {
       if (m) {
         const [platform, ...pathArgs] = positional(t);
         const paths = pathArgs
-          .map((v) => ({ wikitext: toWikitext(v).trim(), segments: pathSegments(v) }))
+          .map((v) => {
+            const segments = pathSegments(v);
+            return { path: renderSegments(segments), wikitext: toWikitext(v).trim(), segments };
+          })
           .filter((p) => p.wikitext !== "");
         out.rows.push({ type: m[1]!.toLowerCase() as "config" | "saves", platform: renderText(platform ?? []), paths });
       } else if (t.name === "XDG") {

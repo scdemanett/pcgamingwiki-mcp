@@ -88,7 +88,9 @@ Internal tables (`PCGW_*`) and `_pageData` stay blocked.
 - Fields starting with `_` (`_pageName`, `_pageID`) must be aliased in `fields` (e.g. `Game._pageName=Page`).
 - List fields (`Steam_AppID`, `Developers`) need `HOLDS` in `where`, not `=`.
 - `Released` is a list of dates separated by `;`, while most lists use `,`. Split by the delimiter each field declares.
-- `GameData.Paths` holds rendered paths (`%LOCALAPPDATA%\anyway`), not the `{{p|…}}` template form. Return the Cargo value and, if asked, the section's raw wikitext.
+- `GameData.Paths` holds rendered paths (`%LOCALAPPDATA%\anyway`), not the `{{p|…}}` template form. [Module:Cargo/gamePaths](https://www.pcgamingwiki.com/wiki/Module:Cargo/gamePaths) does the rendering: each token becomes a fixed string (`appdata` → `%APPDATA%`, `userprofile\documents` → `%USERPROFILE%\Documents`, `osxhome`/`linuxhome` → `$HOME`, `game` → `<path-to-game>`, `uid` → `<user-id>`, `hkcu` → `HKEY_CURRENT_USER`…), `{{LocalizedPath|x}}` → `<Localized x>`, `{{code|x}}` → `x`, and refs are dropped. `src/wikitext/paths.ts` copies that table so wikitext mode returns identical strings. A row's paths are joined with `, ` into a `,`-delimited list, so a path containing a comma can't round-trip through Cargo. Rows with no path aren't stored at all.
+- `GameData.Type` is `Saves` or `Config`; `GameData.Platform` is the template's first arg as written (`Windows`, `OS X`, `Steam`, `GOG.com`…), the same as in wikitext.
+- `Cloud` has one column per client (`Discord`, `Epic_Games_Launcher`, `GOG_Galaxy`, `EA_app`, `iCloud`, `OneDrive`, `Steam`, `Ubisoft_Connect`, `Xbox`) and no notes; the wikitext template has notes and uses different keys (`steam cloud`, `xbox cloud`, `origin`).
 - PCGW changes its schema without warning. Generate the allowlist from `Special:CargoTables` with a script, and check the [API changelog](https://www.pcgamingwiki.com/wiki/PCGamingWiki:API) before each release.
 
 **Reference queries from the API page**
@@ -139,6 +141,13 @@ Seven tools, all marked `readOnlyHint: true` and `openWorldHint: true`. Every re
 - Multi-page results (`search_games`, an ambiguous `resolve_game`) carry a `source` without `history_url` or `page_id`; each item has its own `url` and `history_url` instead.
 - Both modes return one `GameInfo` shape. Some fields only wikitext mode can fill, and they're absent in Cargo mode: `steam_appid_side`/`gog_id_side` (Cargo merges side IDs into `steam_appid`), `reception`, developer and publisher notes, and availability IDs, notes and OS. Only Cargo mode reports `future` availability and a language `status`.
 - Anonymous calls: `search_games` 1; `resolve_game` and `get_game` 2 (`prefixsearch` or `idlookup`, then `parse`). Every underlying response is cached, so a second tool on the same game usually costs 0–1 calls.
+
+**Settled in milestone 3**
+
+- `get_save_locations` returns `platforms: { <platform>: { saves: [], config: [] } }` plus `platforms_available` (all platforms, before the `platform` filter), `cloud` keyed by client (`steam`, `gog_galaxy`, `epic_games_launcher`, `ea_app`, `ubisoft_connect`, `xbox`, `icloud`, `discord`, `onedrive`), and `notes`/`xdg`. Each path has `path` (rendered as Cargo stores it) in both modes; wikitext mode adds `wikitext` and `segments` (`{text}` / `{token}`), which is what a Ludusavi mapping would start from.
+- The `platform` filter ignores case and punctuation and knows common aliases (`mac` → OS X, `gog` → GOG.com, `epic`, `xbox`/`msstore` → Microsoft Store, `ea`/`origin`, `ubisoft`/`uplay`).
+- Mode differences: Cargo mode has no notes, XDG flag or cloud notes, and omits stores whose rows have no path. `raw: true` adds the section's wikitext, and in Cargo mode it also fetches the article for notes (one extra call).
+- `get_section` reads the article in both modes (so it always reports `mode: "wikitext"`). Without `section` it lists `{index, level, heading}`; index 0 is the lead. A section includes its subsections. `format: "text"` (default) turns Game data, Availability, L10n and `|key = value` tables into `- key: value (notes)` lines and headings into `##`; `wikitext` is sliced from the article as written. Output is capped at 40,000 characters, with `truncated: true`. Indexes count the headings written in the article, not ones added by templates, so they can differ from MediaWiki's own section numbers.
 
 **Resources (optional, v1.1):** `pcgw://schema/{table}` for a table's field list, and `pcgw://page/{title}` for whole-page wikitext.
 
@@ -234,6 +243,6 @@ test/
 
 1. **Spike (half a day): done 22 Nov 2026, see Spike results.** the Cloudflare and anonymous-endpoint checks above, plus a template-parser prototype on 5 tricky articles
 2. **Core (2 days): done 22 Nov 2026.** HTTP client with rate limit and 429 pause, cache, optional bot-password login, envelope, `search_games`, `resolve_game`, `get_game` in both modes. 65 fixture tests; one live `get_game` call through the built server confirmed Node's `fetch` isn't challenged. **Cargo mode is tested only on synthetic responses** (we have no bot password yet): record real `cargoquery` and login responses as fixtures once we do, and check the alias-key format (`Steam AppID` vs `Steam_AppID`) and the `Company:`/`Engine:` prefixes the mapper strips.
-3. **Game data (1 day):** `get_save_locations` and `get_section` with wikitext parsing
+3. **Game data (1 day): done 22 Nov 2026.** `get_save_locations` (both modes, same path strings) and `get_section` (text or wikitext). 93 fixture tests; checked live on Hollow Knight, an article with no fixture. Cargo mode again only on synthetic responses.
 4. **Features and Cargo (1 day):** `get_features`, `cargo_query` with allowlist and validator
 5. **Ship (half a day):** README with bot-password setup steps, Inspector and Claude checks, staff go-ahead, npm 0.1.0

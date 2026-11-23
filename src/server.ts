@@ -7,6 +7,8 @@ import { type Clock, DEFAULT_QUEUE, RequestQueue, realClock } from "./client/que
 import { type Config, VERSION, userAgent } from "./config.js";
 import type { ToolContext } from "./tools/context.js";
 import { registerGetGame } from "./tools/get_game.js";
+import { registerGetSaveLocations } from "./tools/get_save_locations.js";
+import { registerGetSection } from "./tools/get_section.js";
 import { registerResolveGame } from "./tools/resolve_game.js";
 import { registerSearchGames } from "./tools/search_games.js";
 
@@ -44,5 +46,7 @@ export function createServer(cfg: Config, deps: ServerDeps = {}): McpServer {
   registerSearchGames(server, ctx);
   registerResolveGame(server, ctx);
   registerGetGame(server, ctx);
+  registerGetSaveLocations(server, ctx);
+  registerGetSection(server, ctx);
   return server;
 }

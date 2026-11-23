@@ -4,7 +4,7 @@ Free, MIT-licensed, read-only MCP server (TypeScript, stdio) that gives agents s
 
 ## Status
 
-Milestones 1 (spike) and 2 (core) done: `search_games`, `resolve_game` and `get_game` work in both modes, behind the queue, cache and HTTP client in `src/client/`. Cargo mode is only tested on synthetic responses until we have a bot password. Next is milestone 3 (`get_save_locations`, `get_section`). Work through the remaining open questions with Steven as they come up.
+Milestones 1–3 done: `search_games`, `resolve_game`, `get_game`, `get_save_locations` and `get_section` work in both modes, behind the queue, cache and HTTP client in `src/client/`. Path rendering copies Module:Cargo/gamePaths (`src/wikitext/paths.ts`); if PCGW changes that module, update the table. Cargo mode is only tested on synthetic responses until we have a bot password. Next is milestone 4 (`get_features`, `cargo_query`). Work through the remaining open questions with Steven as they come up.
 
 ## Non-negotiable rules
 
