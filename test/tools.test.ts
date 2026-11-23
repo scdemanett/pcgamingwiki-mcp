@@ -258,10 +258,10 @@ describe("MCP server", () => {
     return client;
   }
 
-  it("lists the five read-only tools", async () => {
+  it("lists six read-only tools without a bot password (no cargo_query)", async () => {
     const client = await connect();
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(["get_game", "get_save_locations", "get_section", "resolve_game", "search_games"]);
+    expect(tools.map((t) => t.name).sort()).toEqual(["get_features", "get_game", "get_save_locations", "get_section", "resolve_game", "search_games"]);
     for (const t of tools) expect(t.annotations).toMatchObject({ readOnlyHint: true, openWorldHint: true });
   });
 

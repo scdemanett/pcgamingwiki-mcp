@@ -1,0 +1,31 @@
+{
+ "cargofields": {
+  "Discord": {
+   "type": "String"
+  },
+  "Epic_Games_Launcher": {
+   "type": "String"
+  },
+  "GOG_Galaxy": {
+   "type": "String"
+  },
+  "EA_app": {
+   "type": "String"
+  },
+  "iCloud": {
+   "type": "String"
+  },
+  "OneDrive": {
+   "type": "String"
+  },
+  "Steam": {
+   "type": "String"
+  },
+  "Ubisoft_Connect": {
+   "type": "String"
+  },
+  "Xbox": {
+   "type": "String"
+  }
+ }
+}

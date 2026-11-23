@@ -1,0 +1,16 @@
+{
+ "cargofields": {
+  "Developer": {
+   "type": "Page"
+  },
+  "Website": {
+   "type": "URL"
+  },
+  "First_release": {
+   "type": "Date"
+  },
+  "Latest_release": {
+   "type": "Date"
+  }
+ }
+}

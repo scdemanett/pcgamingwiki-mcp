@@ -6,6 +6,8 @@ import { PcgwHttp } from "./client/http.js";
 import { type Clock, DEFAULT_QUEUE, RequestQueue, realClock } from "./client/queue.js";
 import { type Config, VERSION, userAgent } from "./config.js";
 import type { ToolContext } from "./tools/context.js";
+import { registerCargoQuery } from "./tools/cargo_query.js";
+import { registerGetFeatures } from "./tools/get_features.js";
 import { registerGetGame } from "./tools/get_game.js";
 import { registerGetSaveLocations } from "./tools/get_save_locations.js";
 import { registerGetSection } from "./tools/get_section.js";
@@ -48,5 +50,8 @@ export function createServer(cfg: Config, deps: ServerDeps = {}): McpServer {
   registerGetGame(server, ctx);
   registerGetSaveLocations(server, ctx);
   registerGetSection(server, ctx);
+  registerGetFeatures(server, ctx);
+  // Raw Cargo queries need a bot password; without one the tool isn't offered at all.
+  if (ctx.api.hasCargo) registerCargoQuery(server, ctx);
   return server;
 }

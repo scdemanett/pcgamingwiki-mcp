@@ -1,0 +1,91 @@
+{
+ "cargofields": {
+  "Direct3D_versions": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "DirectDraw_versions": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "WinG": {
+   "type": "String"
+  },
+  "OpenGL_versions": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Glide_versions": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Software_renderer": {
+   "type": "String"
+  },
+  "Mantle_support": {
+   "type": "String"
+  },
+  "Metal_support": {
+   "type": "String"
+  },
+  "Vulkan_versions": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "DOS_video_modes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Windows_16bit_executable": {
+   "type": "String"
+  },
+  "Windows_32bit_executable": {
+   "type": "String"
+  },
+  "Windows_64bit_executable": {
+   "type": "String"
+  },
+  "Windows_ARM_app": {
+   "type": "String"
+  },
+  "Mac_OS_X_PowerPC_app": {
+   "type": "String"
+  },
+  "macOS_Intel_32bit_app": {
+   "type": "String"
+  },
+  "macOS_Intel_64bit_app": {
+   "type": "String"
+  },
+  "macOS_ARM_app": {
+   "type": "String"
+  },
+  "Linux_PowerPC_app": {
+   "type": "String"
+  },
+  "Linux_32bit_executable": {
+   "type": "String"
+  },
+  "Linux_64bit_executable": {
+   "type": "String"
+  },
+  "Linux_ARM_app": {
+   "type": "String"
+  },
+  "Linux_68k_app": {
+   "type": "String"
+  },
+  "Mac_OS_68K_app": {
+   "type": "String"
+  },
+  "Mac_OS_PowerPC_app": {
+   "type": "String"
+  }
+ }
+}

@@ -12,11 +12,13 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+    "prepublishOnly": "npm run typecheck && npm test && npm run build",
+    "gen-allowlist": "vite-node scripts/gen-allowlist.ts"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
     "typescript": "^5.9.3",
+    "vite-node": "^3.2.4",
     "vitest": "^3.2.7"
   },
   "dependencies": {

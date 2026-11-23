@@ -1,0 +1,204 @@
+{
+ "cargofields": {
+  "Key_remapping": {
+   "type": "String"
+  },
+  "Mouse_acceleration": {
+   "type": "String"
+  },
+  "Mouse_sensitivity": {
+   "type": "String"
+  },
+  "Mouse_input_in_menus": {
+   "type": "String"
+  },
+  "Keyboard_and_mouse_prompts": {
+   "type": "String"
+  },
+  "Mouse_Y_axis_inversion": {
+   "type": "String"
+  },
+  "Touchscreen": {
+   "type": "String"
+  },
+  "Controller_support": {
+   "type": "String"
+  },
+  "Full_controller_support": {
+   "type": "String"
+  },
+  "Controller_support_level": {
+   "type": "String"
+  },
+  "Controller_remapping": {
+   "type": "String"
+  },
+  "Controller_sensitivity": {
+   "type": "String"
+  },
+  "Controller_Y_axis_inversion": {
+   "type": "String"
+  },
+  "XInput_controller_support": {
+   "type": "String"
+  },
+  "Xbox_prompts": {
+   "type": "String"
+  },
+  "Xbox_One_Impulse_Triggers": {
+   "type": "String"
+  },
+  "DirectInput_controller_support": {
+   "type": "String"
+  },
+  "DirectInput_prompts": {
+   "type": "String"
+  },
+  "Other_controller_support": {
+   "type": "String"
+  },
+  "Other_button_prompts": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Playstation_controller_support": {
+   "type": "String"
+  },
+  "Playstation_prompts": {
+   "type": "String"
+  },
+  "Playstation_motion_sensors": {
+   "type": "String"
+  },
+  "Playstation_motion_sensors_modes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Playstation_light_bar_support": {
+   "type": "String"
+  },
+  "DualSense_adaptive_trigger_support": {
+   "type": "String"
+  },
+  "DualSense_adaptive_trigger_support_modes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "DualSense_haptic_feedback_support": {
+   "type": "String"
+  },
+  "PlayStation_controller_models": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Playstation_connection_modes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Nintendo_controllers": {
+   "type": "String"
+  },
+  "Nintendo_controller_models": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Nintendo_prompts": {
+   "type": "String"
+  },
+  "Nintendo_button_layout": {
+   "type": "String"
+  },
+  "Nintendo_motion_sensors": {
+   "type": "String"
+  },
+  "Nintendo_motion_sensors_modes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Nintendo_connection_modes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Tracked_motion_controllers": {
+   "type": "String"
+  },
+  "Tracked_motion_controller_prompts": {
+   "type": "String"
+  },
+  "Peripheral_devices": {
+   "type": "String"
+  },
+  "Peripheral_device_types": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Controller_hotplugging": {
+   "type": "String"
+  },
+  "Input_prompt_override": {
+   "type": "String"
+  },
+  "Controller_haptic_feedback": {
+   "type": "String"
+  },
+  "Controller_haptic_feedback_hd": {
+   "type": "String"
+  },
+  "Controller_haptic_feedback_hd_models": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Simultaneous_input": {
+   "type": "String"
+  },
+  "Steam_Input_API_support": {
+   "type": "String"
+  },
+  "Steam_hook_input": {
+   "type": "String"
+  },
+  "Steam_Input_prompts": {
+   "type": "String"
+  },
+  "Steam_Input_prompts_icons": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Steam_Input_prompts_styles": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Steam_Controller_prompts": {
+   "type": "String"
+  },
+  "Steam_Deck_prompts": {
+   "type": "String"
+  },
+  "Steam_Input_motion_sensors": {
+   "type": "String"
+  },
+  "Steam_Input_motion_sensors_modes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Steam_Input_presets": {
+   "type": "String"
+  },
+  "Steam_Input_mouse_cursor_detection": {
+   "type": "String"
+  }
+ }
+}

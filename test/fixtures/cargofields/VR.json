@@ -1,0 +1,75 @@
+{
+ "cargofields": {
+  "Native_3D": {
+   "type": "String"
+  },
+  "Nvidia_3D_Vision": {
+   "type": "String"
+  },
+  "vorpX": {
+   "type": "String"
+  },
+  "vorpX_modes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "VR_only": {
+   "type": "String"
+  },
+  "OpenXR": {
+   "type": "String"
+  },
+  "SteamVR": {
+   "type": "String"
+  },
+  "OculusVR": {
+   "type": "String"
+  },
+  "Windows_Mixed_Reality": {
+   "type": "String"
+  },
+  "OSVR": {
+   "type": "String"
+  },
+  "Forte_VFX1": {
+   "type": "String"
+  },
+  "Keyboard_mouse": {
+   "type": "String"
+  },
+  "Body_tracking": {
+   "type": "String"
+  },
+  "Hand_tracking": {
+   "type": "String"
+  },
+  "Face_tracking": {
+   "type": "String"
+  },
+  "Eye_tracking": {
+   "type": "String"
+  },
+  "Tobii_Eye_Tracking": {
+   "type": "String"
+  },
+  "TrackIR": {
+   "type": "String"
+  },
+  "3RD_Space_Gaming_Vest": {
+   "type": "String"
+  },
+  "Novint_Falcon": {
+   "type": "String"
+  },
+  "Play_area_seated": {
+   "type": "String"
+  },
+  "Play_area_standing": {
+   "type": "String"
+  },
+  "Play_area_room_scale": {
+   "type": "String"
+  }
+ }
+}

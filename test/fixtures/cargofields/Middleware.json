@@ -1,0 +1,74 @@
+{
+ "cargofields": {
+  "Physics": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Audio": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Interface": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Input": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Cutscenes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Multiplayer": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Anticheat": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Removed_Physics": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Removed_Audio": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Removed_Interface": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Removed_Input": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Removed_Cutscenes": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Removed_Multiplayer": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Removed_Anticheat": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  }
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "cargofields": {
+  "Separate_volume_controls": {
+   "type": "String"
+  },
+  "Surround_sound": {
+   "type": "String"
+  },
+  "Subtitles": {
+   "type": "String"
+  },
+  "Closed_captions": {
+   "type": "String"
+  },
+  "Mute_on_focus_lost": {
+   "type": "String"
+  },
+  "EAX_support": {
+   "type": "String"
+  },
+  "Royalty_free_audio": {
+   "type": "String"
+  },
+  "Red_Book_CD_audio": {
+   "type": "String"
+  },
+  "General_MIDI_audio": {
+   "type": "String"
+  }
+ }
+}

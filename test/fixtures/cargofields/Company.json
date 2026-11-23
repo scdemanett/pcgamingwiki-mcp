@@ -1,0 +1,16 @@
+{
+ "cargofields": {
+  "Website": {
+   "type": "URL"
+  },
+  "Parent": {
+   "type": "Page"
+  },
+  "Founded": {
+   "type": "Date"
+  },
+  "Defunct": {
+   "type": "Date"
+  }
+ }
+}

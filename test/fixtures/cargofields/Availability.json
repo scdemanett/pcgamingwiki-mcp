@@ -1,0 +1,179 @@
+{
+ "cargofields": {
+  "Present": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Past": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Future": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Uses_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Removed_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Retail_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Developer_website_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Publisher_website_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Official_website_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Amazon_US_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Amazon_UK_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Amazon_FR_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Amazon_IT_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Amazon_DE_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Amazon_ES_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Amazon_JP_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Battlenet_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Bethesdanet_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Discord_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "EA_app_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Epic_Games_Store_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "GamersGate_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Gamesplanet_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "GOGcom_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Green_Man_Gaming_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Humble_Store_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "itchio_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Mac_App_Store_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Meta_Store_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Microsoft_Store_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Steam_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Twitch_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Ubisoft_Store_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Viveport_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  },
+  "Zoom_Platform_DRM": {
+   "type": "String",
+   "isList": true,
+   "delimiter": ","
+  }
+ }
+}
