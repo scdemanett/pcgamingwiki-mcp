@@ -1,0 +1,24 @@
+HTTP/1.1 200 OK
+Date: Mon, 23 Nov 2026 03:16:40 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 168
+Connection: keep-alive
+Accept-Ranges: bytes
+Cache-Control: no-store
+content-disposition: inline; filename=api-result.json
+expires: Mon, 23 Nov 2026 03:36:40 GMT
+Server: cloudflare
+vary: Accept-Encoding,Treat-as-Untrusted,Cookie
+via: 1.1 Caddy
+via: 1.1 varnish (Varnish/7.0)
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-request-id: 1e5d292759c145750e17e40d
+x-varnish: 198535638
+Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+last-modified: Mon, 23 Nov 2026 03:16:40 GMT
+cf-cache-status: MISS
+Strict-Transport-Security: max-age=15552000; includeSubDomains; preload
+Report-To: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=xk4OrFEQbNx7ug1iOv9sYBs4r8mHAVxg52oDQLsV64BP8F1Mflz6aqgrXAO5UoZU656BsdtlKpBSfmoF9j%2Fvpyax3iBYuSVtuj72HBQiS%2FRlAWZrsrjYyPlFDCBvs47Nm66q05xr"}]}
+CF-RAY: a5ed043729d2f673-CLE
+
