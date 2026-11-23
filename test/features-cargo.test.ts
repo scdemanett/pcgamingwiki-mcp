@@ -10,7 +10,7 @@ import { createApi, createServer } from "../src/server.js";
 import type { ToolContext } from "../src/tools/context.js";
 import { cargoQuery } from "../src/tools/cargo_query.js";
 import { getFeaturesTool } from "../src/tools/get_features.js";
-import { type Route, fakeFetch, fixtureRoutes, json, manualClock } from "./fake-fetch.js";
+import { type Route, fakeFetch, fixtureRoutes, json, manualClock, testEnv } from "./fake-fetch.js";
 
 const templateSource = (title: string): string => {
   const body = JSON.parse(readFileSync(new URL("./fixtures/templates/feature-templates.json", import.meta.url), "utf8"));
@@ -68,6 +68,13 @@ describe("buildCargoQuery()", () => {
     );
     expect(ok({ tables: "Game", fields: "Genres", where: 'Developers HOLDS "a\\"b"' }).where).toBe('Game.Developers HOLDS "a\\"b"');
     expect(ok({ tables: "Game", fields: "Genres", where: "Steam_AppID HOLDS LIKE \"12%\"" }).where).toBe('Game.Steam_AppID HOLDS LIKE "12%"');
+  });
+
+  it("reads columns that start with digits as fields, not numbers", () => {
+    expect(ok({ tables: "Video", fields: "120_FPS", where: '120_FPS = "false" OR 60_FPS != "true" AND 4K_Ultra_HD = "hackable"' }).where).toBe(
+      'Video.120_FPS = "false" OR Video.60_FPS != "true" AND Video.4K_Ultra_HD = "hackable"',
+    );
+    expect(ok({ tables: "Game", fields: "Developers", where: "Steam_AppID > 1200 AND Steam_AppID < 12.5" }).where).toBe("Game.Steam_AppID > 1200 AND Game.Steam_AppID < 12.5");
   });
 
   it.each([
@@ -128,7 +135,7 @@ describe("get_features (wikitext mode)", () => {
   function anon() {
     const clock = manualClock();
     const fetch = fakeFetch(fixtureRoutes);
-    return { ctx: { api: createApi(loadConfig({}), { fetch, clock }), now: () => new Date(clock.now()) } satisfies ToolContext, fetch };
+    return { ctx: { api: createApi(loadConfig(testEnv()), { fetch, clock }), now: () => new Date(clock.now()) } satisfies ToolContext, fetch };
   }
 
   it("keys values by template parameter and keeps notes (Elden Ring video)", async () => {
@@ -166,7 +173,7 @@ describe("Cargo mode (synthetic responses)", () => {
       ...extra,
       ...fixtureRoutes,
     ]);
-    const cfg = loadConfig({ PCGW_BOT_USER: "Tester@mcp", PCGW_BOT_PASSWORD: "pw" });
+    const cfg = loadConfig({ ...testEnv(), PCGW_BOT_USER: "Tester@mcp", PCGW_BOT_PASSWORD: "pw", PCGW_PREFER_CARGO: "1" });
     return { ctx: { api: createApi(cfg, { fetch, clock }), now: () => new Date(clock.now()) } satisfies ToolContext, fetch, cfg };
   }
   const cargoCalls = (fetch: { calls: { url: URL }[] }) => fetch.calls.filter((c) => c.url.searchParams.get("action") === "cargoquery");
@@ -222,7 +229,7 @@ describe("Cargo mode (synthetic responses)", () => {
     expect(fetch.calls).toHaveLength(0);
   });
 
-  it("registers cargo_query only when a bot password is set", async () => {
+  it("lists cargo_query with a bot password too", async () => {
     const { cfg } = cargo();
     const server = createServer(cfg, { fetch: fakeFetch([]), clock: manualClock() });
     const client = new Client({ name: "t", version: "0" });

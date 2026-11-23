@@ -71,26 +71,35 @@ On Windows, if Claude Desktop can't find `npx`, use `"command": "cmd"` and `"arg
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `PCGW_CONTACT` | none (warning at startup) | Contact info added to the User-Agent |
-| `PCGW_BOT_USER` | none | Bot-password user name, `YourName@BotName` |
+| `PCGW_BOT_USER` | none | Bot-password user name, `YourName@BotName`. Overrides a saved login |
 | `PCGW_BOT_PASSWORD` | none | Bot password. Never logged or returned |
+| `PCGW_PREFER_CARGO` | off | `1`: when logged in, `get_game`, `get_save_locations` and `get_features` read Cargo tables instead of wikitext (experimental) |
+| `PCGW_CONFIG_DIR` | per-user config folder | Where `login` saves the bot password |
 | `PCGW_CACHE_TTL` | `86400` | Seconds to cache each API response (0 turns caching off) |
 | `PCGW_CACHE_DIR` | none (memory only) | Folder for a persistent cache of what you've looked up |
 
 ### Without a bot password (default)
 
 All tools except `cargo_query` work. They read each article's wikitext and parse its templates, so responses include the wiki's notes. Responses say `"mode": "wikitext"`.
+### Logging in for `cargo_query` (optional)
 
-### With a bot password (optional)
-
-Since August 2026 PCGamingWiki only allows its Cargo query API to logged-in clients. With a bot password, `get_game`, `get_save_locations` and `get_features` read Cargo's structured tables instead (`"mode": "cargo"`), and `cargo_query` becomes available.
+`cargo_query` answers questions across many games at once ("games whose frame rate is capped at 60", "RPGs released since 2020 with ultrawide support"). Since August 2026 PCGamingWiki only allows its Cargo query API to logged-in clients, so this one tool needs a PCGamingWiki bot password. Without one, it returns `auth_required` with these instructions, and every other tool works as usual.
 
 1. Log in to PCGamingWiki (create an account if you need one).
 2. Open [Special:BotPasswords](https://www.pcgamingwiki.com/wiki/Special:BotPasswords), type a bot name such as `mcp`, and click **Create**.
-3. Under grants, tick **Create, query and delete data through the Cargo extension**. That's the only grant `cargoquery` accepts today. This server never creates or deletes anything, but you may prefer a separate account for it.
+3. Under grants, tick **Create, query and delete data through the Cargo extension**. That's the only grant `cargoquery` accepts today. This server never creates or deletes anything, but you may prefer a separate PCGamingWiki account for it.
 4. Click **Create** and copy the password shown. It's displayed only once.
-5. Set `PCGW_BOT_USER` to `YourName@mcp` and `PCGW_BOT_PASSWORD` to the password, as env vars in your MCP client config, never in a file you commit.
+5. In a terminal, run:
 
-The password is held in memory only and used just for `action=login`. If login fails, the Cargo tools return `auth_failed`; the others keep working.
+   ```sh
+   npx pcgamingwiki-mcp login
+   ```
+
+   Enter `YourName@mcp` and the password (typing is hidden). The command logs in, runs one small Cargo query to check the grant, and only then saves the login to your user config folder (`%APPDATA%\pcgamingwiki-mcp` on Windows, `~/Library/Application Support/pcgamingwiki-mcp` on macOS, `~/.config/pcgamingwiki-mcp` elsewhere), readable by your account only. A running server picks it up on the next call; no restart needed.
+
+`npx pcgamingwiki-mcp status` shows whether a login is saved, and `npx pcgamingwiki-mcp logout` deletes it. To revoke the bot password itself, remove it on Special:BotPasswords. You can also set `PCGW_BOT_USER` and `PCGW_BOT_PASSWORD` in your MCP client config instead; env vars win over a saved login.
+
+The password never goes through the AI model or the chat: it's typed into your terminal, used only for `action=login`, and never logged or returned. Logging in only enables `cargo_query`. The per-game tools keep reading wikitext, which includes the editors' notes. Set `PCGW_PREFER_CARGO=1` if you want them to read Cargo tables instead (experimental).
 
 ## How it treats PCGamingWiki
 

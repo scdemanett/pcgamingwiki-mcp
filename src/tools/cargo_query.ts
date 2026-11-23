@@ -54,7 +54,7 @@ export function registerCargoQuery(server: McpServer, ctx: ToolContext): void {
     "cargo_query",
     {
       title: "Query PCGamingWiki's Cargo tables",
-      description: `Advanced: run a read-only Cargo query across PCGamingWiki's structured data. Tables allowed: ${Object.keys(CARGO_TABLES).join(", ")} (schema as of ${ALLOWLIST_DATE}). At most ${MAX_TABLES} tables (joined with join_on) and ${MAX_LIMIT} rows. Each row comes with its article URL. Prefer get_game, get_save_locations and get_features for a single game.`,
+      description: `Advanced: run a read-only Cargo query across PCGamingWiki's structured data. Needs a PCGamingWiki bot password: if it returns auth_required, ask the user to run \`npx pcgamingwiki-mcp login\` in a terminal, then try again (no restart needed). Tables allowed: ${Object.keys(CARGO_TABLES).join(", ")} (schema as of ${ALLOWLIST_DATE}). At most ${MAX_TABLES} tables (joined with join_on) and ${MAX_LIMIT} rows. Each row comes with its article URL. Prefer get_game, get_save_locations and get_features for a single game.`,
       inputSchema: cargoQueryShape,
       annotations: READ_ONLY,
     },

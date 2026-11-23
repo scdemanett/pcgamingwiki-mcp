@@ -1,10 +1,16 @@
 import { readFileSync } from "node:fs";
+import { configDir } from "./credentials.js";
 
 export interface Config {
   apiUrl: string;
   contact?: string;
+  /** Bot password from env vars. Wins over the credentials file written by `login`. */
   botUser?: string;
   botPassword?: string;
+  /** Folder holding credentials.json from `pcgamingwiki-mcp login`. */
+  configDir: string;
+  /** PCGW_PREFER_CARGO=1: per-game tools read Cargo tables when logged in (default: wikitext). */
+  preferCargo: boolean;
   cacheTtlMs: number;
   cacheMax: number;
   cacheDir?: string;
@@ -25,6 +31,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     contact: env.PCGW_CONTACT?.trim() || undefined,
     botUser,
     botPassword,
+    configDir: configDir(env),
+    preferCargo: /^(1|true|yes)$/i.test(env.PCGW_PREFER_CARGO?.trim() ?? ""),
     cacheTtlMs: ttlS * 1000,
     cacheMax: 2000,
     cacheDir: env.PCGW_CACHE_DIR?.trim() || undefined,

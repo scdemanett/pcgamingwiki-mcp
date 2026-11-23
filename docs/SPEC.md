@@ -31,7 +31,7 @@ These rules are hard requirements. The code enforces each one; none is just a RE
 | Stay under 60 requests a minute per IP | [API page](https://www.pcgamingwiki.com/wiki/PCGamingWiki:API): over the limit returns HTTP 429 and blocks the IP for 60 s | Sliding-window limit of 50 request starts in any rolling 60 s (a token bucket could burst past 60 across a window edge), leaving headroom for anything else on the same IP. One request at a time. On any 429, every request is refused with `rate_limited` for 61 s, with no retry before that. `maxlag=5` on every call, with one retry after at most 10 s |
 | Cache on our side | API page asks clients to index or cache as much as they can, at least for a while | 24 h TTL by default. In-memory LRU, plus an optional disk cache (`PCGW_CACHE_DIR`, off by default). Each tool resolves an ID once and reuses it |
 | Identify the client | API page: custom User-Agent with contact info, in MediaWiki format; generic agents may get 403 or bans | `pcgamingwiki-mcp/<version> (https://github.com/scdemanett/pcgamingwiki-mcp; <PCGW_CONTACT>) node/<version>`. Without `PCGW_CONTACT` the server still runs, but logs a warning at startup |
-| Authenticate for Cargo | API page: `cargoquery` needs a bot password and `action=login` since the August 2026 migration | Optional `PCGW_BOT_USER` and `PCGW_BOT_PASSWORD` from env only. Never logged or returned. Without them, Cargo-backed tools fall back to parsing wikitext |
+| Authenticate for Cargo | API page: `cargoquery` needs a bot password and `action=login` since the August 2026 migration | Optional bot password, from `PCGW_BOT_USER`/`PCGW_BOT_PASSWORD` or from the file `pcgamingwiki-mcp login` saves in the user's config folder (owner-only permissions). Never logged, returned or asked for through MCP. Without one, `cargo_query` returns `auth_required` with login steps and everything else uses wikitext |
 | Attribute every result | Content licence CC BY-NC-SA 3.0 | Every response carries `source.url`, `source.history_url`, `license` and a ready-to-repeat attribution line |
 | Non-commercial only | Same licence | README and package metadata say the data is CC BY-NC-SA. The MIT licence covers only the code. No paid tier or hosted version |
 | Share-alike on derived data | Same licence | README tells users that anything they publish from the output carries CC BY-NC-SA |
@@ -56,7 +56,7 @@ Everything comes from `https://www.pcgamingwiki.com/w/api.php`. `action=idlookup
 - `action=query&prop=info&pageids=…`: page ID to title
 - `action=login` + `meta=tokens&type=login`: bot-password session, only when credentials are set
 
-**Two modes.** With a bot password, the structured tools use Cargo: one call per lookup, typed fields. Without one, they fetch the article's wikitext and parse its templates (`Infobox game`, `Game data`, `Video` and others). The parser is needed either way for sections Cargo doesn't hold, so anonymous mode costs little extra code. Every response says which mode produced it (`"mode": "cargo" | "wikitext"`).
+**Two modes.** With a bot password and `PCGW_PREFER_CARGO=1`, the structured tools use Cargo: one call per lookup, typed fields (see Login below for why that's opt-in). Otherwise they fetch the article's wikitext and parse its templates (`Infobox game`, `Game data`, `Video` and others). The parser is needed either way for sections Cargo doesn't hold, so anonymous mode costs little extra code. Every response says which mode produced it (`"mode": "cargo" | "wikitext"`).
 
 **Cargo tables v1 allows** (live schema, checked 22 Nov 2026 on [Special:CargoTables](https://www.pcgamingwiki.com/wiki/Special:CargoTables))
 
@@ -134,7 +134,12 @@ Seven tools, all marked `readOnlyHint: true` and `openWorldHint: true`. Every re
 
 *Game ref = `title`, `steam_appid`, `gog_id` or `page_id`. A non-title ref resolves through `idlookup` (or Cargo when authenticated) first, and that resolution is cached.
 
-`cargo_query` needs a bot password and is not registered when none is set. The other six tools work in both modes; anonymous mode usually takes 2 calls (resolve, then parse).
+`cargo_query` needs a bot password. It's always listed, and without one it returns `auth_required` telling the agent to have the user run `npx pcgamingwiki-mcp login`. The other six tools work in both modes; anonymous mode usually takes 2 calls (resolve, then parse).
+
+**Login (added 23 Nov 2026).** PCGW has no OAuth extension (siteinfo lists only PluggableAuth, which handles website sign-in), so there's no browser login flow. MCP elicitation must not ask for secrets, and a tool argument would put the password in the transcript. So the login happens in a terminal:
+- `pcgamingwiki-mcp login` prompts for `User@BotName` and the bot password (hidden input, TTY only). It logs in, then runs one `cargoquery` on `Game` to prove the Cargo grant: 3 requests. Only then does it save `credentials.json` in the per-user config folder (`%APPDATA%\pcgamingwiki-mcp`, `~/Library/Application Support/pcgamingwiki-mcp` or `$XDG_CONFIG_HOME/pcgamingwiki-mcp`; `PCGW_CONFIG_DIR` overrides it), with modes 0700 and 0600. `logout` deletes the file, and `status` shows the source and user, never the password.
+- Env vars win over the file. The server reads credentials on every Cargo call and reuses the session while they're unchanged, so login and logout take effect without a restart.
+- Logging in enables `cargo_query` only. The per-game tools stay in wikitext mode (richer, and tested live) unless `PCGW_PREFER_CARGO=1`. This reverses the original design, in which credentials switched those tools to Cargo.
 
 **Errors** come back as tool results with `isError: true` and a code the agent can act on: `not_found` (title misses include `suggestions`), `ambiguous` (with candidates), `rate_limited` (with `retry_after_s`), `auth_required`, `auth_failed`, `forbidden` (HTTP 403: check the User-Agent and IP), `blocked_by_cloudflare`, `invalid_input` (e.g. not exactly one game ref), `invalid_query` (names the field or table), `upstream_error`.
 

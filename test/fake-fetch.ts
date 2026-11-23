@@ -77,3 +77,9 @@ export function manualClock(start = 1_700_000_000_000): Clock & { t: number } {
   };
   return c;
 }
+
+/**
+ * Env for loadConfig in tests: points the credentials folder at a path that never
+ * exists, so a real `pcgamingwiki-mcp login` on the dev machine can't leak in.
+ */
+export const testEnv = (): NodeJS.ProcessEnv => ({ PCGW_CONFIG_DIR: `${process.cwd()}/test/.no-such-config-dir` });

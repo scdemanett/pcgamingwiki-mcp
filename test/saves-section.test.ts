@@ -6,7 +6,7 @@ import { getGame } from "../src/tools/get_game.js";
 import { getSaveLocationsTool } from "../src/tools/get_save_locations.js";
 import { MAX_SECTION_CHARS, getSection } from "../src/tools/get_section.js";
 import { renderPathToken } from "../src/wikitext/paths.js";
-import { type Route, fakeFetch, fixture, fixtureRoutes, json, manualClock } from "./fake-fetch.js";
+import { type Route, fakeFetch, fixture, fixtureRoutes, json, manualClock, testEnv } from "./fake-fetch.js";
 
 /**
  * Prefix-search answers for titles we only have parse recordings for. SYNTHETIC but
@@ -33,7 +33,7 @@ const parseSkyrim: Route = (u) =>
 function anon(extra: Route[] = []) {
   const clock = manualClock();
   const fetch = fakeFetch([...extra, syntheticSearch, parseSkyrim, ...fixtureRoutes]);
-  const ctx: ToolContext = { api: createApi(loadConfig({}), { fetch, clock }), now: () => new Date(clock.now()) };
+  const ctx: ToolContext = { api: createApi(loadConfig(testEnv()), { fetch, clock }), now: () => new Date(clock.now()) };
   return { ctx, fetch };
 }
 
@@ -154,7 +154,7 @@ describe("get_save_locations (Cargo mode, synthetic responses)", () => {
       ...fixtureRoutes,
     ]);
     const ctx: ToolContext = {
-      api: createApi(loadConfig({ PCGW_BOT_USER: "Tester@mcp", PCGW_BOT_PASSWORD: "pw" }), { fetch, clock }),
+      api: createApi(loadConfig({ ...testEnv(), PCGW_BOT_USER: "Tester@mcp", PCGW_BOT_PASSWORD: "pw", PCGW_PREFER_CARGO: "1" }), { fetch, clock }),
       now: () => new Date(clock.now()),
     };
     return { ctx, fetch };

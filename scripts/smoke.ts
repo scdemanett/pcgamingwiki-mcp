@@ -8,6 +8,7 @@
  */
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { currentCredentials } from "../src/credentials.js";
 
 const GAP_MS = 2000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -22,7 +23,7 @@ interface Check {
   verify?: (data: Json, env: Json) => string | undefined;
 }
 
-const hasBot = Boolean(process.env.PCGW_BOT_USER && process.env.PCGW_BOT_PASSWORD);
+const hasBot = currentCredentials() !== undefined;
 
 const checks: Check[] = [
   {

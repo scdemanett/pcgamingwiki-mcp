@@ -23,14 +23,35 @@ export type CargoRow = Record<string, string>;
 const CARGO_PAGE_SIZE = 50;
 
 /** Typed wrappers for the api.php modules we use. All traffic goes through PcgwHttp. */
+/** How to log in again when cargoquery is refused; shown to the agent. */
+export const LOGIN_HINT =
+  "Cargo queries need a PCGamingWiki bot password. Ask the user to run `npx pcgamingwiki-mcp login` in a terminal (or set PCGW_BOT_USER and PCGW_BOT_PASSWORD); no restart is needed.";
+
 export class PcgwApi {
+  private readonly sessionFor: () => BotSession | undefined;
+  private readonly preferCargo: boolean;
+
+  /**
+   * `session` is a fixed session, or a provider asked on every call, so a login or
+   * logout done while the server runs takes effect on the next request.
+   */
   constructor(
     private readonly http: PcgwHttp,
-    private readonly session?: BotSession,
-  ) {}
+    session?: BotSession | (() => BotSession | undefined),
+    opts: { preferCargo?: boolean } = {},
+  ) {
+    this.sessionFor = typeof session === "function" ? session : () => session;
+    this.preferCargo = opts.preferCargo ?? true;
+  }
 
+  /** A bot password is available, so cargo_query can run. */
+  get canQueryCargo(): boolean {
+    return this.sessionFor() !== undefined;
+  }
+
+  /** The per-game tools should read Cargo tables instead of wikitext. */
   get hasCargo(): boolean {
-    return this.session !== undefined;
+    return this.preferCargo && this.canQueryCargo;
   }
 
   /** Case-insensitive prefix search that resolves redirects and returns page IDs, in one call. */
@@ -97,8 +118,9 @@ export class PcgwApi {
    * Pages through results 50 rows at a time, up to `maxRows`.
    */
   async cargo(params: Params, maxRows = CARGO_PAGE_SIZE): Promise<{ rows: CargoRow[]; fetchedAt: string }> {
-    if (!this.session) throw new PcgwError("auth_required", "Cargo queries need a PCGamingWiki bot password (PCGW_BOT_USER, PCGW_BOT_PASSWORD).");
-    await this.session.ensure();
+    const session = this.sessionFor();
+    if (!session) throw new PcgwError("auth_required", LOGIN_HINT);
+    await session.ensure();
     const rows: CargoRow[] = [];
     let fetchedAt = "";
     for (let offset = 0; offset < maxRows; offset += CARGO_PAGE_SIZE) {
@@ -109,7 +131,7 @@ export class PcgwApi {
       } catch (err) {
         // Session expired: log in again once, then retry (errors are never cached).
         if (!(err instanceof PcgwError) || err.code !== "auth_required") throw err;
-        await this.session.relogin();
+        await session.relogin();
         res = await this.http.get(page);
       }
       fetchedAt ||= res.fetchedAt;

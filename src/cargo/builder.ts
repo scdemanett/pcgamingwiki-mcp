@@ -199,7 +199,8 @@ function tokenize(src: string, tables: string[]): Token[] {
       i = j + 1;
       continue;
     }
-    const num = /^-?\d+(\.\d+)?(?![A-Za-z_])/.exec(src.slice(i));
+    // Not followed by a word character: otherwise "120_FPS" backtracks to the number 12.
+    const num = /^-?\d+(\.\d+)?(?![A-Za-z0-9_.])/.exec(src.slice(i));
     if (num) {
       out.push({ kind: "number", value: num[0] });
       i += num[0].length;

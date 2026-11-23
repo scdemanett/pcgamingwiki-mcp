@@ -8,12 +8,12 @@ import type { ToolContext } from "../src/tools/context.js";
 import { getGame } from "../src/tools/get_game.js";
 import { resolveGame } from "../src/tools/resolve_game.js";
 import { searchGames } from "../src/tools/search_games.js";
-import { type Route, fakeFetch, fixtureRoutes, json, manualClock } from "./fake-fetch.js";
+import { type Route, fakeFetch, fixtureRoutes, json, manualClock, testEnv } from "./fake-fetch.js";
 
 function anon(extra: Route[] = []) {
   const clock = manualClock();
   const fetch = fakeFetch([...extra, ...fixtureRoutes]);
-  const api = createApi(loadConfig({}), { fetch, clock });
+  const api = createApi(loadConfig(testEnv()), { fetch, clock });
   const ctx: ToolContext = { api, now: () => new Date(clock.now()) };
   return { ctx, fetch };
 }
@@ -209,7 +209,7 @@ describe("get_game (Cargo mode, synthetic responses)", () => {
       },
       ...fixtureRoutes,
     ]);
-    const api = createApi(loadConfig({ PCGW_BOT_USER: "Tester@mcp", PCGW_BOT_PASSWORD: "pw" }), { fetch, clock });
+    const api = createApi(loadConfig({ ...testEnv(), PCGW_BOT_USER: "Tester@mcp", PCGW_BOT_PASSWORD: "pw", PCGW_PREFER_CARGO: "1" }), { fetch, clock });
     return { ctx: { api, now: () => new Date(clock.now()) } satisfies ToolContext, fetch };
   }
 
@@ -251,17 +251,17 @@ describe("get_game (Cargo mode, synthetic responses)", () => {
 describe("MCP server", () => {
   async function connect() {
     const fetch = fakeFetch(fixtureRoutes);
-    const server = createServer(loadConfig({}), { fetch, clock: manualClock() });
+    const server = createServer(loadConfig(testEnv()), { fetch, clock: manualClock() });
     const client = new Client({ name: "test", version: "0" });
     const [a, b] = InMemoryTransport.createLinkedPair();
     await Promise.all([server.connect(a), client.connect(b)]);
     return client;
   }
 
-  it("lists six read-only tools without a bot password (no cargo_query)", async () => {
+  it("lists all seven read-only tools, cargo_query included, without a bot password", async () => {
     const client = await connect();
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(["get_features", "get_game", "get_save_locations", "get_section", "resolve_game", "search_games"]);
+    expect(tools.map((t) => t.name).sort()).toEqual(["cargo_query", "get_features", "get_game", "get_save_locations", "get_section", "resolve_game", "search_games"]);
     for (const t of tools) expect(t.annotations).toMatchObject({ readOnlyHint: true, openWorldHint: true });
   });
 
