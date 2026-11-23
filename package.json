@@ -1,9 +1,36 @@
 {
   "name": "pcgamingwiki-mcp",
-  "version": "0.0.0",
-  "description": "Read-only MCP server for PCGamingWiki data (code MIT; wiki data CC BY-NC-SA 3.0)",
+  "version": "0.1.0",
+  "description": "Read-only MCP server for PCGamingWiki: game facts, save locations, feature tables. Code MIT; wiki data CC BY-NC-SA 3.0.",
   "license": "MIT",
+  "author": "Steven Demanett",
+  "homepage": "https://github.com/scdemanett/pcgamingwiki-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/scdemanett/pcgamingwiki-mcp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scdemanett/pcgamingwiki-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "pcgamingwiki",
+    "pc-gaming",
+    "save-games"
+  ],
   "type": "module",
+  "bin": {
+    "pcgamingwiki-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=20"
   },
@@ -13,36 +40,18 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "prepublishOnly": "npm run typecheck && npm test && npm run build",
-    "gen-allowlist": "vite-node scripts/gen-allowlist.ts"
-  },
-  "devDependencies": {
-    "@types/node": "^20.19.43",
-    "typescript": "^5.9.3",
-    "vite-node": "^3.2.4",
-    "vitest": "^3.2.7"
+    "gen-allowlist": "vite-node scripts/gen-allowlist.ts",
+    "smoke": "vite-node scripts/smoke.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
     "lru-cache": "^11.5.3",
     "zod": "^4.6.7"
   },
-  "bin": {
-    "pcgamingwiki-mcp": "dist/index.js"
-  },
-  "main": "dist/index.js",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/scdemanett/pcgamingwiki-mcp.git"
-  },
-  "keywords": [
-    "mcp",
-    "pcgamingwiki",
-    "model-context-protocol",
-    "games"
-  ]
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "typescript": "^5.9.3",
+    "vite-node": "^3.2.4",
+    "vitest": "^3.2.7"
+  }
 }

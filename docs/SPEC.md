@@ -216,7 +216,7 @@ test/
 
 **Install docs:** Claude Desktop config JSON, `claude mcp add pcgamingwiki -- npx -y pcgamingwiki-mcp`, and a generic stdio snippet. README sections: what it does, compliance rules, data licence vs code licence, env vars, bot-password setup.
 
-**Release:** GitHub Actions runs lint, typecheck and tests on every PR. Tagged releases publish to npm with provenance.
+**Release:** GitHub Actions (`.github/workflows/ci.yml`) runs typecheck, tests and build on Node 20, 22 and 24 for every PR and push to main. There's no linter yet; add one (e.g. Biome) if style drift becomes a problem. Pushing a `v*` tag runs `release.yml`, which checks the tag matches `package.json`, tests, and publishes to npm with provenance using the `NPM_TOKEN` secret. Before tagging, run `npm run gen-allowlist` and `npm run smoke` by hand.
 
 ## Open questions
 
@@ -256,4 +256,8 @@ test/
 2. **Core (2 days): done 22 Nov 2026.** HTTP client with rate limit and 429 pause, cache, optional bot-password login, envelope, `search_games`, `resolve_game`, `get_game` in both modes. 65 fixture tests; one live `get_game` call through the built server confirmed Node's `fetch` isn't challenged. **Cargo mode is tested only on synthetic responses** (we have no bot password yet): record real `cargoquery` and login responses as fixtures once we do, and check the alias-key format (`Steam AppID` vs `Steam_AppID`) and the `Company:`/`Engine:` prefixes the mapper strips.
 3. **Game data (1 day): done 22 Nov 2026.** `get_save_locations` (both modes, same path strings) and `get_section` (text or wikitext). 93 fixture tests; checked live on Hollow Knight, an article with no fixture. Cargo mode again only on synthetic responses.
 4. **Features and Cargo (1 day): done 23 Nov 2026.** `get_features` (both modes, same keys), `cargo_query` with the generated allowlist and `where` validator, and `scripts/gen-allowlist.ts`. 128 fixture tests, including 20 injection attempts. `get_features` checked live on Hollow Knight. `cargo_query` and Cargo-mode `get_features` are tested only on synthetic responses.
-5. **Ship (half a day):** README with bot-password setup steps, Inspector and Claude checks, staff go-ahead, npm 0.1.0
+5. **Ship (half a day): in progress.** Done 23 Nov 2026: README (install for Claude Code, Claude Desktop and generic stdio; env vars; bot-password steps; compliance rules; data vs code licence), MIT `LICENSE` with a note on the data licence, `npm run smoke` (9 checks through the built binary over stdio, all passing live), CI and release workflows, version 0.1.0. `npm pack` gives 32 files and 39 kB, with no tests or fixtures. The npm name `pcgamingwiki-mcp` was free on 23 Nov 2026. MCP Inspector (CLI) lists all six anonymous tools with correct annotations and schemas. Still to do, by Steven:
+   - Try it in Claude Desktop and Claude Code (README commands).
+   - Ask PCGW staff on Discord for a go-ahead (and the narrower Cargo grant question), then link the thread from the README.
+   - Create a bot password and run `npm run smoke` with it, to record real Cargo responses and replace the synthetic fixtures.
+   - Add the GitHub remote and push, add the `NPM_TOKEN` secret, then tag `v0.1.0`.
