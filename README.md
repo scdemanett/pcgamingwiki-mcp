@@ -1,3 +1,5 @@
+<img src="assets/icon.svg" alt="" width="96" height="96" align="right">
+
 # pcgamingwiki-mcp
 
 A free, read-only [MCP](https://modelcontextprotocol.io) server that gives AI agents structured data from [PCGamingWiki](https://www.pcgamingwiki.com): game facts, save and config file locations, cloud sync, and the video, input, audio and API feature tables. It runs locally over stdio and talks only to PCGamingWiki's own API, one request at a time and well under its rate limit.

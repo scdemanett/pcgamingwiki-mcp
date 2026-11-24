@@ -18,6 +18,7 @@
   "documentation": "https://github.com/scdemanett/pcgamingwiki-mcp#readme",
   "support": "https://github.com/scdemanett/pcgamingwiki-mcp/issues",
   "license": "MIT",
+  "icon": "icon.png",
   "keywords": ["pcgamingwiki", "pc-gaming", "save-games", "games"],
   "privacy_policies": ["https://www.pcgamingwiki.com/wiki/PCGamingWiki:Privacy_policy"],
   "server": {

@@ -1,6 +1,6 @@
 // Builds the Claude Desktop extension: build/pcgamingwiki-mcp-<version>.mcpb.
 // Run through `npm run pack:mcpb`, which bundles the server first. The extension holds
-// only the manifest and the single-file bundle (no node_modules). No network use except
+// only the manifest, the icon and the single-file bundle (no node_modules). No network use except
 // npx fetching the mcpb CLI; nothing is sent to PCGamingWiki.
 import { execSync } from "node:child_process";
 import { cpSync, mkdirSync, readFileSync, rmSync } from "node:fs";
@@ -26,6 +26,7 @@ rmSync(join(root, "build"), { recursive: true, force: true });
 mkdirSync(join(stage, "server"), { recursive: true });
 for (const f of ["manifest.json", "README.md", "LICENSE"]) cpSync(join(root, f), join(stage, f));
 cpSync(join(root, "plugin", "server", "index.mjs"), join(stage, "server", "index.mjs"));
+cpSync(join(root, "assets", "icon.png"), join(stage, "icon.png"));
 
 run(`${MCPB} validate "${join(stage, "manifest.json")}"`);
 run(`${MCPB} pack "${stage}" "${out}"`);
