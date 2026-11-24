@@ -243,6 +243,7 @@ test/
 - [ ] Is there a narrower grant than "Create, query and delete data through the Cargo extension"? A read-only tool shouldn't ask users for create and delete rights. Ask PCGW on Discord.
 - [x] What is `cargoquery`'s maximum `limit` on PCGW? **500** (5,000 with `apihighlimits`), default 50, per `paraminfo`. Our cap of 50 is well under.
 - [ ] Is PCGW staff OK with the tool? Ask on Discord before release, and note any limits they give.
+- [ ] Add a Streamable HTTP mode bound to localhost (`--http`)? ChatGPT only takes remote MCP servers (full support on Business/Enterprise/Edu, read-only on Pro, per OpenAI's help, Nov 2026); its Secure MCP Tunnel, and Anthropic's MCP tunnels for Claude connectors, could reach a local server that way while requests to PCGW still leave from each user's own IP. Real work and a technical setup for users; after 0.1.0.
 - [ ] Should `get_save_locations` also output Ludusavi-style placeholders (`<winLocalAppData>`), for SaveVault and game-save-recon? Or leave that to the skills?
 
 ## Spike results (22 Nov 2026)

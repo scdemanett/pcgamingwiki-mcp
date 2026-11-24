@@ -64,7 +64,7 @@ It shows the settings dialog when you install; change them later with `/plugin c
 
 Claude Desktop runs the extension with its own built-in Node.js, so you don't need to install anything else.
 
-**From npm (other MCP clients, or setting it up by hand)**
+**From npm (Cursor, Codex, Lumo, other MCP clients, or setting it up by hand)**
 
 These need Node.js 20 or later. Set `PCGW_CONTACT` to a way to reach you.
 
@@ -86,7 +86,46 @@ Claude Desktop without the extension (`claude_desktop_config.json`):
 }
 ```
 
-On Windows, if Claude Desktop can't find `npx`, use `"command": "cmd"` and `"args": ["/c", "npx", "-y", "pcgamingwiki-mcp"]`. Any other MCP client: run `npx -y pcgamingwiki-mcp` as a stdio server.
+On Windows, if Claude Desktop can't find `npx`, use `"command": "cmd"` and `"args": ["/c", "npx", "-y", "pcgamingwiki-mcp"]`.
+
+**Cursor:** add this to `~/.cursor/mcp.json` (all projects) or `.cursor/mcp.json` in a project, then turn the server on under Cursor Settings → MCP:
+
+```json
+{
+  "mcpServers": {
+    "pcgamingwiki": {
+      "command": "npx",
+      "args": ["-y", "pcgamingwiki-mcp"],
+      "env": { "PCGW_CONTACT": "you@example.com" }
+    }
+  }
+}
+```
+
+**Codex (OpenAI's CLI and IDE extension):**
+
+```sh
+codex mcp add pcgamingwiki --env PCGW_CONTACT=you@example.com -- npx -y pcgamingwiki-mcp
+```
+
+or add it to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.pcgamingwiki]
+command = "npx"
+args = ["-y", "pcgamingwiki-mcp"]
+env = { PCGW_CONTACT = "you@example.com" }
+```
+
+**Proton Lumo Desktop:** open Connectors, click **Add MCP server**, choose a local (stdio) server, and enter the command `npx` with the arguments `-y pcgamingwiki-mcp`. If it offers environment variables, add `PCGW_CONTACT`.
+
+**Any other MCP client:** run `npx -y pcgamingwiki-mcp` as a stdio server.
+
+In all of these, `cargo_query` uses `PCGW_BOT_USER` and `PCGW_BOT_PASSWORD` from the config, or a login saved with `npx pcgamingwiki-mcp login` if the client has no place for secrets.
+
+**Without npm:** every client above can also run the bundled server from a copy of this repo: use `node` as the command and the full path to `plugin/server/index.mjs` as the only argument. It has no other files or dependencies.
+
+**ChatGPT** can't run local MCP servers: it only connects to remote servers by HTTPS URL. This server doesn't offer that yet.
 
 ## Configuration
 
