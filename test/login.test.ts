@@ -157,6 +157,35 @@ describe("login without restarting the server", () => {
     await expect(cargoQuery(ctx, query)).rejects.toMatchObject({ code: "auth_required" });
   });
 
+  it("logs in cleanly after a logout and a new login, as MediaWiki refuses action=login on a logged-in session", async () => {
+    const clock = manualClock();
+    // Like MediaWiki: a successful login sets a session cookie, and a login request
+    // that still carries it is aborted.
+    const fetch = fakeFetch([
+      (_u, c) => {
+        if (c.method !== "POST") return;
+        return (c.headers.Cookie ?? "").includes("pcgwBotSession")
+          ? json({ login: { result: "Aborted", reason: "Cannot log in when using MediaWiki\\Session\\BotPasswordSessionProvider sessions." } })
+          : json({ login: { result: "Success" } }, 200, { "set-cookie": "pcgwBotSession=abc; path=/; HttpOnly" });
+      },
+      ...pcgw(),
+      ...fixtureRoutes,
+    ]);
+    const ctx: ToolContext = { api: createApi(loadConfig(env), { fetch, clock }), now: () => new Date(clock.now()) };
+
+    writeCredentialsFile({ user: "Me@mcp", password: PASSWORD }, env);
+    await cargoQuery(ctx, query);
+    expect(fetch.calls.at(-1)!.headers.Cookie).toContain("pcgwBotSession");
+
+    deleteCredentialsFile(env);
+    await expect(cargoQuery(ctx, query)).rejects.toMatchObject({ code: "auth_required" });
+    await getGame(ctx, { title: "Elden Ring" });
+    expect(fetch.calls.at(-1)!.headers.Cookie).toBeUndefined(); // logged out: no session sent
+
+    writeCredentialsFile({ user: "Me@mcp", password: PASSWORD }, env);
+    expect((await cargoQuery(ctx, query)).data.rows[0]!.page).toBe("Half-Life");
+  });
+
   it("keeps per-game tools in wikitext mode after login unless PCGW_PREFER_CARGO is set", async () => {
     writeCredentialsFile({ user: "Me@mcp", password: PASSWORD }, env);
     const { ctx } = server();

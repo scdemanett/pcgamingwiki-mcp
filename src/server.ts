@@ -46,7 +46,11 @@ function sessionProvider(cfg: Config, http: PcgwHttp): () => BotSession | undefi
   return () => {
     const creds =
       cfg.botUser && cfg.botPassword ? { user: cfg.botUser, password: cfg.botPassword } : readCredentialsFile({ PCGW_CONFIG_DIR: cfg.configDir });
-    if (!creds) return (cached = undefined);
+    if (!creds) {
+      // Logged out: stop sending the old session with later requests.
+      if (cached) http.clearCookies();
+      return (cached = undefined);
+    }
     if (cached?.user !== creds.user || cached.password !== creds.password) {
       cached = { ...creds, session: new BotSession(http, creds.user, creds.password) };
     }

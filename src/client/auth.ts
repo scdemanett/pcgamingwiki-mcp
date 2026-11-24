@@ -31,6 +31,10 @@ export class BotSession {
   }
 
   private async login(): Promise<void> {
+    // MediaWiki aborts action=login on a request that already carries a bot-password
+    // session ("Cannot log in when using BotPasswordSessionProvider sessions"), so a
+    // new login (after logout + login, a changed password or a relogin) starts clean.
+    this.http.clearCookies();
     const tokenRes = await this.http.get({ action: "query", meta: "tokens", type: "login" }, { cache: false });
     const token: unknown = tokenRes.body?.query?.tokens?.logintoken;
     if (typeof token !== "string") throw new PcgwError("auth_failed", "PCGamingWiki did not return a login token.");

@@ -61,6 +61,11 @@ export class PcgwHttp {
     return { body, fetchedAt: new Date(this.clock.now()).toISOString(), fromCache: false };
   }
 
+  /** Drop the session: later requests are anonymous until the next login. */
+  clearCookies(): void {
+    this.cookies.clear();
+  }
+
   buildUrl(params: Params): string {
     const u = new URL(this.opts.apiUrl);
     for (const [k, v] of Object.entries(this.withDefaults(params))) if (v !== undefined) u.searchParams.set(k, String(v));

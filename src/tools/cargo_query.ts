@@ -5,11 +5,13 @@ import { MAX_LIMIT, MAX_TABLES, PAGE_ALIAS, buildCargoQuery } from "../cargo/bui
 import { type Envelope, type Source, envelope, historyUrl, pageUrl, toolResult } from "../envelope.js";
 import { READ_ONLY, type ToolContext, safely } from "./context.js";
 
-const stringOrList = z.union([z.string().trim().min(1).max(1000), z.array(z.string().trim().min(1).max(100)).min(1).max(30)]);
+// Plain comma-separated strings, not string-or-array unions: clients such as the MCP
+// Inspector can only offer a raw JSON editor for a union.
+const commaList = z.string().trim().min(1).max(1000);
 
 export const cargoQueryShape = {
-  tables: stringOrList.describe(`1–${MAX_TABLES} allowed tables, e.g. "Game" or ["Game", "GameData"]`),
-  fields: stringOrList.describe('Fields as Table.Field or Field, optionally =Alias, e.g. ["Game.Developers", "Game.Released=Date"]'),
+  tables: commaList.describe(`1–${MAX_TABLES} allowed tables, comma-separated, e.g. "Game" or "Game, GameData"`),
+  fields: commaList.describe('Comma-separated fields as Table.Field or Field, optionally =Alias, e.g. "Game.Developers, Game.Released=Date"'),
   where: z
     .string()
     .max(500)
