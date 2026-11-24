@@ -117,7 +117,17 @@ args = ["-y", "pcgamingwiki-mcp"]
 env = { PCGW_CONTACT = "you@example.com" }
 ```
 
-**Proton Lumo Desktop:** open Connectors, click **Add MCP server**, choose a local (stdio) server, and enter the command `npx` with the arguments `-y pcgamingwiki-mcp`. If it offers environment variables, add `PCGW_CONTACT`.
+**Proton Lumo Desktop:** open Connectors, click **Add MCP server**, and fill in:
+
+| Field | Value |
+| --- | --- |
+| ID / Display name | `pcgamingwiki` / `PCGamingWiki` |
+| Description | `PC game facts, save locations and feature tables from PCGamingWiki.` |
+| Transport | Local (command) |
+| Command | `npx` |
+| Args (comma-separated) | `-y,pcgamingwiki-mcp` |
+| Environment | `PCGW_CONTACT=you@example.com`, and for `cargo_query` also `PCGW_BOT_USER=YourName@mcp` |
+| Secret environment | `PCGW_BOT_PASSWORD=…` (only for `cargo_query`; Lumo keeps it in your OS keychain) |
 
 **Any other MCP client:** run `npx -y pcgamingwiki-mcp` as a stdio server.
 
