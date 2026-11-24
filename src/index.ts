@@ -11,6 +11,7 @@ const log = (msg: string) => console.error(`[pcgamingwiki-mcp] ${msg}`);
 
 async function serve(): Promise<void> {
   const cfg = loadConfig();
+  for (const w of cfg.warnings) log(w);
   if (!cfg.contact) {
     log("PCGW_CONTACT is not set. PCGamingWiki asks API clients for contact info in the User-Agent; please set it (e.g. a URL or email).");
   }
@@ -18,7 +19,7 @@ async function serve(): Promise<void> {
   log(
     creds
       ? `Bot password for ${creds.creds.user} (${creds.source === "env" ? "env vars" : "saved login"}): cargo_query enabled${cfg.preferCargo ? "; per-game tools read Cargo" : ""}.`
-      : "No bot password: cargo_query will ask the user to run `npx pcgamingwiki-mcp login`.",
+      : "No bot password: cargo_query will ask the user to log in (extension settings or `npx pcgamingwiki-mcp login`).",
   );
   const server = createServer(cfg, { log });
   await server.connect(new StdioServerTransport());

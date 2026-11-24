@@ -41,7 +41,9 @@
     "test": "vitest run",
     "prepublishOnly": "npm run typecheck && npm test && npm run build",
     "gen-allowlist": "vite-node scripts/gen-allowlist.ts",
-    "smoke": "vite-node scripts/smoke.ts"
+    "smoke": "vite-node scripts/smoke.ts",
+    "pack:mcpb": "npm run bundle && node scripts/pack-mcpb.mjs",
+    "bundle": "node scripts/bundle.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -50,6 +52,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
+    "esbuild": "0.28.2",
     "typescript": "^5.9.3",
     "vite-node": "^3.2.4",
     "vitest": "^4.1.12"

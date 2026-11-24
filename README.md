@@ -40,15 +40,39 @@ Errors come back as tool results with `isError: true` and a code: `not_found` (w
 
 ## Install
 
-Needs Node.js 20 or later. Please set `PCGW_CONTACT` to a way to reach you (an email address or a URL). PCGamingWiki asks API clients to include contact details in their User-Agent.
+Pick the one that matches where you use Claude. Every way asks for the same optional settings:
 
-**Claude Code**
+- **Contact**: an email address or URL. PCGamingWiki asks API clients to include contact details in their User-Agent, so please set it.
+- **Bot user** and **Bot password**: only for `cargo_query`; see [Logging in for `cargo_query`](#logging-in-for-cargo_query-optional). The password is masked and kept in your system's secure storage.
+
+**Claude Code, and the Code tab or Cowork in Claude Desktop (plugin)**
+
+In Claude Code, run:
+
+```text
+/plugin marketplace add scdemanett/pcgamingwiki-mcp
+/plugin install pcgamingwiki@pcgamingwiki-mcp
+```
+
+It shows the settings dialog when you install; change them later with `/plugin configure pcgamingwiki@pcgamingwiki-mcp`. In Claude Desktop, use Customize → Plugins → Add marketplace with `scdemanett/pcgamingwiki-mcp`, then install **pcgamingwiki**. The plugin runs a bundled copy of the server and needs Node.js 20 or later on your PATH. Plugins with local servers don't load in Claude Desktop's chat; use the extension below for that.
+
+**Claude Desktop chat (extension)**
+
+1. Download `pcgamingwiki-mcp-<version>.mcpb` from the [latest release](https://github.com/scdemanett/pcgamingwiki-mcp/releases/latest).
+2. Open it, or drag it onto Claude Desktop's Settings → Extensions page, and click **Install**.
+3. Fill in the settings. Change them later under Settings → Extensions → PCGamingWiki.
+
+Claude Desktop runs the extension with its own built-in Node.js, so you don't need to install anything else.
+
+**From npm (other MCP clients, or setting it up by hand)**
+
+These need Node.js 20 or later. Set `PCGW_CONTACT` to a way to reach you.
 
 ```sh
 claude mcp add pcgamingwiki -e PCGW_CONTACT=you@example.com -- npx -y pcgamingwiki-mcp
 ```
 
-**Claude Desktop** (`claude_desktop_config.json`)
+Claude Desktop without the extension (`claude_desktop_config.json`):
 
 ```json
 {
@@ -62,9 +86,7 @@ claude mcp add pcgamingwiki -e PCGW_CONTACT=you@example.com -- npx -y pcgamingwi
 }
 ```
 
-On Windows, if Claude Desktop can't find `npx`, use `"command": "cmd"` and `"args": ["/c", "npx", "-y", "pcgamingwiki-mcp"]`.
-
-**Any other MCP client:** run `npx -y pcgamingwiki-mcp` as a stdio server.
+On Windows, if Claude Desktop can't find `npx`, use `"command": "cmd"` and `"args": ["/c", "npx", "-y", "pcgamingwiki-mcp"]`. Any other MCP client: run `npx -y pcgamingwiki-mcp` as a stdio server.
 
 ## Configuration
 
@@ -89,7 +111,7 @@ All tools except `cargo_query` work. They read each article's wikitext and parse
 2. Open [Special:BotPasswords](https://www.pcgamingwiki.com/wiki/Special:BotPasswords), type a bot name such as `mcp`, and click **Create**.
 3. Under grants, tick **Create, query and delete data through the Cargo extension**. That's the only grant `cargoquery` accepts today. This server never creates or deletes anything, but you may prefer a separate PCGamingWiki account for it.
 4. Click **Create** and copy the password shown. It's displayed only once.
-5. In a terminal, run:
+5. If you installed the plugin or the Claude Desktop extension, paste `YourName@mcp` and the password into its **Bot user** and **Bot password** settings, and you're done. Otherwise, in a terminal, run:
 
    ```sh
    npx pcgamingwiki-mcp login
@@ -121,6 +143,9 @@ npm run build
 ```
 
 - `npm run smoke` makes about 10 live requests through the built server, 2 s apart. Run it by hand before a release, not in CI.
+- `npm run bundle` rebuilds `plugin/server/index.mjs`, the single-file server the plugin and the extension run. It's committed, because plugins install straight from git; run it after any change under `src/` (CI fails if it's stale).
+- `npm run pack:mcpb` builds the Claude Desktop extension into `build/pcgamingwiki-mcp-<version>.mcpb`. Pushing a `v*` tag builds it in CI and attaches it to a GitHub Release.
+- A release bumps the version in `package.json`, `manifest.json` and `plugin/.claude-plugin/plugin.json` together; the pack script and the release workflow refuse a mismatch.
 - `npm run gen-allowlist` regenerates `src/cargo/allowlist.ts` from PCGamingWiki's live Cargo schema (about 16 requests, 3 s apart). Run it before a release, because PCGamingWiki renames tables and columns without notice. `npm run gen-allowlist -- --from-fixtures` rebuilds it offline from the saved responses.
 
 When working against the live wiki by hand, keep at least 2 s between requests and save responses as test fixtures instead of fetching again. The design and its decisions are in [docs/SPEC.md](docs/SPEC.md).

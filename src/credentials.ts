@@ -11,6 +11,19 @@ export interface BotCredentials {
 export type CredentialSource = "env" | "file";
 
 /**
+ * An env var's value, or undefined when it's empty or an unfilled Claude Desktop
+ * extension placeholder (`${user_config.…}`, left as-is for optional settings).
+ * `trim: false` keeps surrounding spaces, for passwords.
+ */
+export function envValue(env: NodeJS.ProcessEnv, name: string, { trim = true }: { trim?: boolean } = {}): string | undefined {
+  const raw = env[name];
+  if (raw === undefined) return undefined;
+  const v = trim ? raw.trim() : raw;
+  if (!v.trim() || /^\$\{user_config\.[^}]*\}$/.test(v.trim())) return undefined;
+  return v;
+}
+
+/**
  * Per-user config folder:
  * Windows %APPDATA%\pcgamingwiki-mcp, macOS ~/Library/Application Support/pcgamingwiki-mcp,
  * elsewhere $XDG_CONFIG_HOME/pcgamingwiki-mcp (default ~/.config). PCGW_CONFIG_DIR overrides it.
@@ -26,8 +39,8 @@ export const credentialsPath = (env: NodeJS.ProcessEnv = process.env): string =>
 
 /** Bot credentials from env vars, if both are set. */
 export function envCredentials(env: NodeJS.ProcessEnv = process.env): BotCredentials | undefined {
-  const user = env.PCGW_BOT_USER?.trim();
-  const password = env.PCGW_BOT_PASSWORD;
+  const user = envValue(env, "PCGW_BOT_USER");
+  const password = envValue(env, "PCGW_BOT_PASSWORD", { trim: false });
   return user && password ? { user, password } : undefined;
 }
 

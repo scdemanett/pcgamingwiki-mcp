@@ -25,3 +25,10 @@ jobs:
       # Tests use recorded fixtures only; CI never contacts PCGamingWiki.
       - run: npm test
       - run: npm run build
+      # The plugin runs the committed bundle, so it must match the source.
+      - if: matrix.node == 22
+        name: Check plugin/server/index.mjs is up to date (run npm run bundle)
+        run: npm run bundle && git diff --exit-code -- plugin/
+      # Catches manifest or packing problems before a release tag.
+      - if: matrix.node == 22
+        run: npm run pack:mcpb

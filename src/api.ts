@@ -25,7 +25,7 @@ const CARGO_PAGE_SIZE = 50;
 /** Typed wrappers for the api.php modules we use. All traffic goes through PcgwHttp. */
 /** How to log in again when cargoquery is refused; shown to the agent. */
 export const LOGIN_HINT =
-  "Cargo queries need a PCGamingWiki bot password. Ask the user to run `npx pcgamingwiki-mcp login` in a terminal (or set PCGW_BOT_USER and PCGW_BOT_PASSWORD); no restart is needed.";
+  "Cargo queries need a PCGamingWiki bot password. If the user installed the Claude Desktop extension or the Claude plugin, ask them to fill in Bot user and Bot password in its settings (Claude Desktop: Settings > Extensions > PCGamingWiki; plugin: /plugin configure pcgamingwiki@pcgamingwiki-mcp). Otherwise ask them to run `npx pcgamingwiki-mcp login` in a terminal; no restart is needed.";
 
 export class PcgwApi {
   private readonly sessionFor: () => BotSession | undefined;

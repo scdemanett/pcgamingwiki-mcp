@@ -1,0 +1,70 @@
+{
+  "$schema": "https://raw.githubusercontent.com/modelcontextprotocol/mcpb/main/dist/mcpb-manifest-v0.3.schema.json",
+  "manifest_version": "0.3",
+  "name": "pcgamingwiki-mcp",
+  "display_name": "PCGamingWiki",
+  "version": "0.1.0",
+  "description": "Read-only PCGamingWiki data: game facts, save and config locations, cloud sync and feature tables.",
+  "long_description": "Looks up PC games on PCGamingWiki through its own API, one request at a time and well under its rate limit. Tools return infobox facts, save and config file paths per platform, cloud save support, the video, input, audio and API feature tables, any article section, and (with an optional bot password) guarded Cargo queries across many games.\n\nWiki data comes from PCGamingWiki contributors under CC BY-NC-SA 3.0: credit PCGamingWiki, non-commercial use only, share alike. Every response includes the page URL and an attribution line. The extension's code is MIT. Not affiliated with PCGamingWiki.",
+  "author": {
+    "name": "Steven Demanett",
+    "url": "https://github.com/scdemanett"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scdemanett/pcgamingwiki-mcp"
+  },
+  "homepage": "https://github.com/scdemanett/pcgamingwiki-mcp",
+  "documentation": "https://github.com/scdemanett/pcgamingwiki-mcp#readme",
+  "support": "https://github.com/scdemanett/pcgamingwiki-mcp/issues",
+  "license": "MIT",
+  "keywords": ["pcgamingwiki", "pc-gaming", "save-games", "games"],
+  "privacy_policies": ["https://www.pcgamingwiki.com/wiki/PCGamingWiki:Privacy_policy"],
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.mjs"],
+      "env": {
+        "PCGW_CONTACT": "${user_config.contact}",
+        "PCGW_BOT_USER": "${user_config.bot_user}",
+        "PCGW_BOT_PASSWORD": "${user_config.bot_password}"
+      }
+    }
+  },
+  "tools": [
+    { "name": "search_games", "description": "Find articles by title prefix (case-insensitive, follows redirects)." },
+    { "name": "resolve_game", "description": "Map a title, Steam AppID, GOG ID or page ID to the article and its store IDs." },
+    { "name": "get_game", "description": "Infobox facts: developers, publishers, engines, release dates, taxonomy, store IDs." },
+    { "name": "get_save_locations", "description": "Save and config paths per platform and store, plus cloud save sync." },
+    { "name": "get_features", "description": "Video, input, audio, API, middleware, VR and multiplayer feature tables." },
+    { "name": "get_section", "description": "Any article section (fixes, issues, mods…) as text or wikitext." },
+    { "name": "cargo_query", "description": "Guarded queries over PCGamingWiki's Cargo tables. Needs a bot password." }
+  ],
+  "user_config": {
+    "contact": {
+      "type": "string",
+      "title": "Contact (email or URL)",
+      "description": "Added to the User-Agent, as PCGamingWiki asks of API clients, so its staff can reach you about your traffic.",
+      "required": false
+    },
+    "bot_user": {
+      "type": "string",
+      "title": "Bot user (optional)",
+      "description": "Only for cargo_query. YourName@BotName from Special:BotPasswords on PCGamingWiki, with the Cargo grant ticked. Leave empty to use the other tools only.",
+      "required": false
+    },
+    "bot_password": {
+      "type": "string",
+      "title": "Bot password (optional)",
+      "description": "The password Special:BotPasswords showed for that bot. Used only to log in; never logged or returned to the model.",
+      "required": false,
+      "sensitive": true
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": { "node": ">=20.0.0" }
+  }
+}

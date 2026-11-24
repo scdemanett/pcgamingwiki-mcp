@@ -184,12 +184,14 @@ All compliance limits sit in the queue and HTTP client, so no tool can bypass th
 
 ## Repo, packaging and testing
 
-Node 20+, TypeScript, ESM, published to npm as `pcgamingwiki-mcp`.
+Node 20+, TypeScript, ESM. Shipped three ways, all from this repo: a Claude Code plugin (also for the Code tab and Cowork in Claude Desktop) through a marketplace in the repo itself, a Claude Desktop extension (`.mcpb`) attached to each GitHub Release for Desktop's chat, and the npm package `pcgamingwiki-mcp` for other clients.
 
 ```
 src/
   index.ts          # stdio entry, registers tools
-  config.ts         # env: PCGW_CONTACT, PCGW_BOT_USER, PCGW_BOT_PASSWORD, PCGW_CACHE_TTL, PCGW_CACHE_DIR
+  config.ts         # env: PCGW_CONTACT, PCGW_BOT_USER, PCGW_BOT_PASSWORD, PCGW_PREFER_CARGO, PCGW_CACHE_TTL, PCGW_CACHE_DIR
+  credentials.ts    # config folder, saved login, envValue()
+  cli.ts            # login / logout / status
   client/
     http.ts         # fetch, User-Agent, maxlag, retries, 403/Cloudflare detection
     queue.ts        # one at a time, 50/min token bucket, 61 s pause on 429
@@ -204,6 +206,9 @@ src/
   envelope.ts       # source / license / attribution / mode
 scripts/
   gen-allowlist.ts  # regenerates cargo/allowlist.ts (run by hand, respects rate limit)
+  smoke.ts          # live checks through the built server (run by hand)
+  pack-mcpb.mjs     # builds the Claude Desktop extension
+manifest.json       # Claude Desktop extension manifest
 test/
   fixtures/         # recorded API responses
   *.test.ts
@@ -221,7 +226,15 @@ test/
 
 **Install docs:** Claude Desktop config JSON, `claude mcp add pcgamingwiki -- npx -y pcgamingwiki-mcp`, and a generic stdio snippet. README sections: what it does, compliance rules, data licence vs code licence, env vars, bot-password setup.
 
-**Release:** GitHub Actions (`.github/workflows/ci.yml`) runs typecheck, tests and build on Node 20, 22 and 24 for every PR and push to main. There's no linter yet; add one (e.g. Biome) if style drift becomes a problem. Pushing a `v*` tag runs `release.yml`, which checks the tag matches `package.json`, tests, and publishes to npm with provenance using the `NPM_TOKEN` secret. Before tagging, run `npm run gen-allowlist` and `npm run smoke` by hand.
+**Single-file bundle:** `npm run bundle` (`scripts/bundle.mjs`, esbuild, minified ESM for Node 20, about 800 kB) writes `plugin/server/index.mjs` with every dependency inside and the version baked in (`__PCGW_VERSION__`, as there's no `package.json` beside it). It's committed, because plugins install straight from git with no build step; CI and the release workflow rebuild it and fail on any difference. `.gitattributes` forces LF everywhere so a Windows build matches CI's byte for byte.
+
+**Plugin:** `plugin/` is the plugin root: `.claude-plugin/plugin.json`, the bundle, a copy of `LICENSE` and a short README. It's in a subfolder so a plugin install never sees the repo's `package.json` and lockfile (Claude Code would otherwise run npm on them). `.claude-plugin/marketplace.json` at the repo root makes the repo its own marketplace, `pcgamingwiki-mcp`, with one plugin, `pcgamingwiki`, sourced from `./plugin`. Users run `/plugin marketplace add scdemanett/pcgamingwiki-mcp` and `/plugin install pcgamingwiki@pcgamingwiki-mcp`. `userConfig` has the same three settings as the extension; `bot_password` is `sensitive` (system credential store). Each has a `default` of `""`, because Cowork skips a server whose `${user_config.*}` options have no default and doesn't prompt. The plugin runs `node`, so it needs Node 20+ on the user's PATH. Local plugin servers don't load in claude.ai or Desktop chat; the extension covers that. Not yet validated with `claude plugin validate` (no CLI on the dev machine).
+
+**Remote connector (not built):** claude.ai custom connectors are remote MCP servers that Anthropic's cloud calls by URL; they can't point at a local stdio server. A hosted server would send every user's requests from one datacenter IP: PCGW's 60/min limit would be shared by all users, and the spike saw a cloud IP get Cloudflare's challenge. Both break the compliance rules, so a connector needs a decision from Steven (and probably PCGW staff) first.
+
+**Desktop extension:** `manifest.json` (MCPB manifest 0.3) describes a Node server at `dist/index.js` and three optional settings that Claude Desktop shows on install: contact, bot user and bot password (`sensitive`, so Desktop masks and stores it securely). They reach the server as `PCGW_CONTACT`, `PCGW_BOT_USER` and `PCGW_BOT_PASSWORD`, so the password still comes from env and never passes through the model. An optional setting left empty may arrive as `""` or as the literal `${user_config.…}` placeholder; `envValue()` treats both as unset, and a half-filled login is ignored with a log warning rather than stopping the server. `npm run pack:mcpb` (`scripts/pack-mcpb.mjs`) bundles the server, stages the manifest, README, LICENSE and `server/index.mjs` (no `node_modules`), checks the versions match, validates the manifest and packs `build/pcgamingwiki-mcp-<version>.mcpb` with `@anthropic-ai/mcpb` 2.1.2 through `npx`. It isn't a devDependency, because its interactive prompts pull in packages with open audit warnings. 0.1.0 packs to 210 kB.
+
+**Release:** GitHub Actions (`.github/workflows/ci.yml`) runs typecheck, tests and build on Node 20, 22 and 24 for every PR and push to main, and packs the `.mcpb` on Node 22 to catch manifest problems early. There's no linter yet; add one (e.g. Biome) if style drift becomes a problem. Pushing a `v*` tag runs `release.yml`: it checks the tag matches `package.json` and `manifest.json`, tests, packs the `.mcpb` and creates a GitHub Release with it attached (using the built-in token). It also publishes to npm with provenance, but only when an `NPM_TOKEN` secret exists. Before tagging, run `npm run gen-allowlist` and `npm run smoke` by hand.
 
 ## Open questions
 
@@ -262,7 +275,9 @@ test/
 3. **Game data (1 day): done 22 Nov 2026.** `get_save_locations` (both modes, same path strings) and `get_section` (text or wikitext). 93 fixture tests; checked live on Hollow Knight, an article with no fixture. Cargo mode again only on synthetic responses.
 4. **Features and Cargo (1 day): done 23 Nov 2026.** `get_features` (both modes, same keys), `cargo_query` with the generated allowlist and `where` validator, and `scripts/gen-allowlist.ts`. 128 fixture tests, including 20 injection attempts. `get_features` checked live on Hollow Knight. `cargo_query` and Cargo-mode `get_features` are tested only on synthetic responses.
 5. **Ship (half a day): in progress.** Done 23 Nov 2026: README (install for Claude Code, Claude Desktop and generic stdio; env vars; bot-password steps; compliance rules; data vs code licence), MIT `LICENSE` with a note on the data licence, `npm run smoke` (9 checks through the built binary over stdio, all passing live), CI and release workflows, version 0.1.0. `npm pack` gives 32 files and 39 kB, with no tests or fixtures. The npm name `pcgamingwiki-mcp` was free on 23 Nov 2026. MCP Inspector (CLI) lists all six anonymous tools with correct annotations and schemas. Still to do, by Steven:
-   - Try it in Claude Desktop and Claude Code (README commands).
+   - Done 24 Nov 2026: login tested live (Inspector `cargo_query` on `Video`, wikitext-mode `get_game`); Claude Desktop extension (`manifest.json`, `npm run pack:mcpb`, release job that attaches the `.mcpb` to a GitHub Release).
+  - Done 24 Nov 2026: the `.mcpb` installed in Claude Desktop with bot-password settings; `resolve_game`, `get_save_locations` and `cargo_query` (live Cargo, first real response) all worked. Added the Claude Code plugin and same-repo marketplace, and the single-file bundle.
+  - Install the plugin from the private repo in Claude Code or Desktop's Code tab and check its settings dialog.
    - Ask PCGW staff on Discord for a go-ahead (and the narrower Cargo grant question), then link the thread from the README.
    - Create a bot password and run `npm run smoke` with it, to record real Cargo responses and replace the synthetic fixtures.
-   - Add the GitHub remote and push, add the `NPM_TOKEN` secret, then tag `v0.1.0`.
+   - Add the GitHub remote and push, then tag `v0.1.0`. Add the `NPM_TOKEN` secret first if the release should also go to npm.

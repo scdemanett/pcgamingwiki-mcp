@@ -34,6 +34,8 @@ export interface CargoQueryInput {
 export interface BuiltQuery {
   params: { tables: string; fields: string; where?: string; join_on?: string; order_by?: string; limit: number };
   tables: string[];
+  /** Output names for default aliases Cargo can't use as-is: f_60_FPS → 60_FPS. */
+  renames: Record<string, string>;
 }
 
 const invalid = (message: string, details: Record<string, unknown> = {}) => new PcgwError("invalid_query", message, details);
@@ -41,7 +43,8 @@ const list = (v: string | string[]) => (Array.isArray(v) ? v : v.split(",")).map
 
 export function buildCargoQuery(input: CargoQueryInput): BuiltQuery {
   const tables = resolveTables(list(input.tables));
-  const fields = buildFields(list(input.fields), tables);
+  const renames: Record<string, string> = {};
+  const fields = buildFields(list(input.fields), tables, renames);
   const params: BuiltQuery["params"] = { tables: tables.join(","), fields, limit: checkLimit(input.limit) };
 
   if (tables.length === 2) {
@@ -52,7 +55,7 @@ export function buildCargoQuery(input: CargoQueryInput): BuiltQuery {
   }
   if (input.where?.trim()) params.where = buildWhere(input.where, tables);
   if (input.order_by?.trim()) params.order_by = buildOrder(input.order_by, tables);
-  return { params, tables };
+  return { params, tables, renames };
 }
 
 function resolveTables(names: string[]): string[] {
@@ -100,7 +103,7 @@ const qualified = (r: FieldRef) => `${r.table}.${r.field}`;
 /** Aliases must start with a letter (fields like 4K_Ultra_HD don't). */
 const defaultAlias = (r: FieldRef) => (r.field.startsWith("_") ? r.field.slice(1) : /^[A-Za-z]/.test(r.field) ? r.field : `f_${r.field}`);
 
-function buildFields(items: string[], tables: string[]): string {
+function buildFields(items: string[], tables: string[], renames: Record<string, string>): string {
   if (items.length === 0) throw invalid("Give at least one field.", { field: "fields" });
   if (items.length > MAX_FIELDS) throw invalid(`At most ${MAX_FIELDS} fields.`, { field: "fields" });
   const aliases = new Set<string>();
@@ -112,6 +115,7 @@ function buildFields(items: string[], tables: string[]): string {
     if (!ALIAS_RE.test(alias)) throw invalid(`Alias "${alias}" must be letters, digits and _ (starting with a letter).`, { field: "fields" });
     if (alias === PAGE_ALIAS || aliases.has(alias.toLowerCase())) throw invalid(`Alias "${alias}" is used twice or reserved.`, { field: "fields" });
     aliases.add(alias.toLowerCase());
+    if (eq === -1 && alias !== ref.field && !ref.field.startsWith("_")) renames[alias] = ref.field;
     out.push(`${qualified(ref)}=${alias}`);
   }
   out.push(`${tables[0]}._pageName=${PAGE_ALIAS}`);

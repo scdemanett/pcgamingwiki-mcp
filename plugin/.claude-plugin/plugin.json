@@ -1,0 +1,42 @@
+{
+  "name": "pcgamingwiki",
+  "version": "0.1.0",
+  "description": "Read-only PCGamingWiki data for Claude: game facts, save and config locations, cloud sync, feature tables and (with a bot password) Cargo queries.",
+  "author": { "name": "Steven Demanett", "url": "https://github.com/scdemanett" },
+  "homepage": "https://github.com/scdemanett/pcgamingwiki-mcp",
+  "repository": "https://github.com/scdemanett/pcgamingwiki-mcp",
+  "license": "MIT",
+  "keywords": ["pcgamingwiki", "pc-gaming", "save-games", "mcp"],
+  "userConfig": {
+    "contact": {
+      "type": "string",
+      "title": "Contact (email or URL)",
+      "description": "Added to the User-Agent, as PCGamingWiki asks of API clients, so its staff can reach you about your traffic. Optional.",
+      "default": ""
+    },
+    "bot_user": {
+      "type": "string",
+      "title": "Bot user (optional)",
+      "description": "Only for cargo_query: YourName@BotName from Special:BotPasswords on PCGamingWiki, with the Cargo grant ticked. Leave empty to use the other tools only.",
+      "default": ""
+    },
+    "bot_password": {
+      "type": "string",
+      "title": "Bot password (optional)",
+      "description": "The password Special:BotPasswords showed for that bot. Stored in your system's credential store; never logged or returned to the model.",
+      "sensitive": true,
+      "default": ""
+    }
+  },
+  "mcpServers": {
+    "pcgamingwiki": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/index.mjs"],
+      "env": {
+        "PCGW_CONTACT": "${user_config.contact}",
+        "PCGW_BOT_USER": "${user_config.bot_user}",
+        "PCGW_BOT_PASSWORD": "${user_config.bot_password}"
+      }
+    }
+  }
+}

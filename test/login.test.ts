@@ -80,6 +80,24 @@ describe("credentials file", () => {
     expect(currentCredentials(env)).toBeUndefined();
   });
 
+  it("treats empty and unfilled Claude Desktop settings as unset", () => {
+    const desktop = { ...env, PCGW_CONTACT: "${user_config.contact}", PCGW_BOT_USER: "${user_config.bot_user}", PCGW_BOT_PASSWORD: "" };
+    const cfg = loadConfig(desktop);
+    expect(cfg.contact).toBeUndefined();
+    expect(cfg.botUser).toBeUndefined();
+    expect(cfg.warnings).toEqual([]);
+    expect(currentCredentials(desktop)).toBeUndefined();
+    expect(loadConfig({ ...env, PCGW_BOT_PASSWORD: " pw " }).warnings).toHaveLength(1);
+  });
+
+  it("ignores a half-filled login instead of stopping the server", () => {
+    const cfg = loadConfig({ ...env, PCGW_BOT_USER: "Me@mcp", PCGW_BOT_PASSWORD: "${user_config.bot_password}" });
+    expect(cfg.botUser).toBeUndefined();
+    expect(cfg.botPassword).toBeUndefined();
+    expect(cfg.warnings[0]).toMatch(/ignoring both/);
+    expect(loadConfig({ ...env, PCGW_BOT_USER: "Me@mcp", PCGW_BOT_PASSWORD: " p w " }).botPassword).toBe(" p w ");
+  });
+
   it("uses the platform's per-user config folder", () => {
     expect(configDir({ APPDATA: "C:\\Users\\me\\AppData\\Roaming" }, "win32")).toBe(join("C:\\Users\\me\\AppData\\Roaming", "pcgamingwiki-mcp"));
     expect(configDir({ XDG_CONFIG_HOME: "/home/me/.cfg" }, "linux")).toBe(join("/home/me/.cfg", "pcgamingwiki-mcp"));

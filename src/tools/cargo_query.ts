@@ -42,7 +42,8 @@ export async function cargoQuery(ctx: ToolContext, args: CargoQueryArgs): Promis
   const built = buildCargoQuery(args);
   const { rows, fetchedAt } = await ctx.api.cargo(built.params, built.params.limit);
   const out = rows.map((r) => {
-    const { [PAGE_ALIAS]: page = "", ...fields } = r;
+    const { [PAGE_ALIAS]: page = "", ...raw } = r;
+    const fields = Object.fromEntries(Object.entries(raw).map(([k, v]) => [built.renames[k] ?? k, v]));
     return { page, url: pageUrl(page), history_url: historyUrl(page), fields };
   });
   const special = new URL("https://www.pcgamingwiki.com/wiki/Special:CargoQuery");
@@ -56,7 +57,7 @@ export function registerCargoQuery(server: McpServer, ctx: ToolContext): void {
     "cargo_query",
     {
       title: "Query PCGamingWiki's Cargo tables",
-      description: `Advanced: run a read-only Cargo query across PCGamingWiki's structured data. Needs a PCGamingWiki bot password: if it returns auth_required, ask the user to run \`npx pcgamingwiki-mcp login\` in a terminal, then try again (no restart needed). Tables allowed: ${Object.keys(CARGO_TABLES).join(", ")} (schema as of ${ALLOWLIST_DATE}). At most ${MAX_TABLES} tables (joined with join_on) and ${MAX_LIMIT} rows. Each row comes with its article URL. Prefer get_game, get_save_locations and get_features for a single game.`,
+      description: `Advanced: run a read-only Cargo query across PCGamingWiki's structured data. Needs a PCGamingWiki bot password: if it returns auth_required, pass on its instructions (extension or plugin settings, or \`npx pcgamingwiki-mcp login\` in a terminal), then try again. Tables allowed: ${Object.keys(CARGO_TABLES).join(", ")} (schema as of ${ALLOWLIST_DATE}). At most ${MAX_TABLES} tables (joined with join_on) and ${MAX_LIMIT} rows. Each row comes with its article URL. Prefer get_game, get_save_locations and get_features for a single game.`,
       inputSchema: cargoQueryShape,
       annotations: READ_ONLY,
     },

@@ -1,0 +1,16 @@
+{
+  "name": "pcgamingwiki-mcp",
+  "owner": { "name": "Steven Demanett", "url": "https://github.com/scdemanett" },
+  "metadata": {
+    "description": "The PCGamingWiki plugin for Claude: read-only game data from PCGamingWiki's API."
+  },
+  "plugins": [
+    {
+      "name": "pcgamingwiki",
+      "source": "./plugin",
+      "description": "Game facts, save and config locations, cloud sync, feature tables and Cargo queries from PCGamingWiki.",
+      "category": "gaming",
+      "homepage": "https://github.com/scdemanett/pcgamingwiki-mcp"
+    }
+  ]
+}

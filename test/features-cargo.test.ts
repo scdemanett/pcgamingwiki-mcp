@@ -178,6 +178,19 @@ describe("Cargo mode (synthetic responses)", () => {
   }
   const cargoCalls = (fetch: { calls: { url: URL }[] }) => fetch.calls.filter((c) => c.url.searchParams.get("action") === "cargoquery");
 
+  it("cargo_query returns digit-leading fields under their real names", async () => {
+    // Row shape as PCGW returned it live on 24 Nov 2026.
+    const { ctx, fetch } = cargo([
+      (u) =>
+        u.searchParams.get("action") === "cargoquery"
+          ? json({ cargoquery: [{ title: { Game: "007 Legends", f_60_FPS: "true", f_120_FPS: "false", PCGWPage: "007 Legends" } }] })
+          : undefined,
+    ]);
+    const env = await cargoQuery(ctx, { tables: "Video", fields: "_pageName=Game, 60_FPS, 120_FPS", where: '120_FPS = "false"' });
+    expect(cargoCalls(fetch)[0]!.url.searchParams.get("fields")).toBe("Video._pageName=Game,Video.60_FPS=f_60_FPS,Video.120_FPS=f_120_FPS,Video._pageName=PCGWPage");
+    expect(env.data.rows[0]).toMatchObject({ page: "007 Legends", fields: { Game: "007 Legends", "60_FPS": "true", "120_FPS": "false" } });
+  });
+
   it("get_features maps aliased columns back to template parameter names, one call per group", async () => {
     const cols = Object.keys(FEATURE_GROUPS.video.columns);
     const at = (c: string) => `f${cols.indexOf(c)}`;

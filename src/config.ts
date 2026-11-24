@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { configDir } from "./credentials.js";
+import { configDir, envValue } from "./credentials.js";
 
 export interface Config {
   apiUrl: string;
@@ -14,6 +14,8 @@ export interface Config {
   cacheTtlMs: number;
   cacheMax: number;
   cacheDir?: string;
+  /** Problems with the settings that didn't stop the server; logged at startup. */
+  warnings: string[];
 }
 
 const DAY_S = 24 * 60 * 60;
@@ -21,26 +23,35 @@ const DAY_S = 24 * 60 * 60;
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const ttlS = env.PCGW_CACHE_TTL ? Number(env.PCGW_CACHE_TTL) : DAY_S;
   if (!Number.isFinite(ttlS) || ttlS < 0) throw new Error("PCGW_CACHE_TTL must be a number of seconds (0 or more)");
-  const botUser = env.PCGW_BOT_USER?.trim() || undefined;
-  const botPassword = env.PCGW_BOT_PASSWORD || undefined;
+  const botUser = envValue(env, "PCGW_BOT_USER");
+  const botPassword = envValue(env, "PCGW_BOT_PASSWORD", { trim: false });
+  const warnings: string[] = [];
+  // Not fatal: in the Desktop extension a half-filled setting would otherwise stop the
+  // whole server. Ignore both and say so in the log.
   if (Boolean(botUser) !== Boolean(botPassword)) {
-    throw new Error("Set both PCGW_BOT_USER and PCGW_BOT_PASSWORD, or neither");
+    warnings.push("Only one of PCGW_BOT_USER and PCGW_BOT_PASSWORD is set; ignoring both. Set both to enable cargo_query.");
   }
+  const halfSet = warnings.length > 0;
   return {
     apiUrl: "https://www.pcgamingwiki.com/w/api.php",
-    contact: env.PCGW_CONTACT?.trim() || undefined,
-    botUser,
-    botPassword,
+    contact: envValue(env, "PCGW_CONTACT"),
+    botUser: halfSet ? undefined : botUser,
+    botPassword: halfSet ? undefined : botPassword,
     configDir: configDir(env),
     preferCargo: /^(1|true|yes)$/i.test(env.PCGW_PREFER_CARGO?.trim() ?? ""),
     cacheTtlMs: ttlS * 1000,
     cacheMax: 2000,
     cacheDir: env.PCGW_CACHE_DIR?.trim() || undefined,
+    warnings,
   };
 }
 
-/** Package version, read from package.json (one level above both src/ and dist/). */
+/** Set by scripts/bundle.mjs in the single-file bundle, which has no package.json beside it. */
+declare const __PCGW_VERSION__: string | undefined;
+
+/** Package version: baked into the bundle, else read from package.json (one level above src/ and dist/). */
 export const VERSION: string = (() => {
+  if (typeof __PCGW_VERSION__ === "string") return __PCGW_VERSION__;
   try {
     const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version?: string };
     return pkg.version ?? "0.0.0";
