@@ -13,15 +13,15 @@ on:
 permissions:
   contents: read
 
+# No dependency cache in release jobs: a poisoned cache could end up in what we publish.
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
       - run: npm ci
       - name: Check the tag matches package.json, manifest.json and the plugin
         run: |
@@ -39,11 +39,10 @@ jobs:
     permissions:
       contents: write # create the GitHub Release
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
       - run: npm ci
       - run: npm run pack:mcpb
       - name: Create the GitHub Release with the .mcpb attached
@@ -63,14 +62,13 @@ jobs:
       - name: Skip without an NPM_TOKEN secret
         if: env.NODE_AUTH_TOKEN == ''
         run: echo "No NPM_TOKEN secret; not publishing to npm."
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: env.NODE_AUTH_TOKEN != ''
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: env.NODE_AUTH_TOKEN != ''
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-          cache: npm
       - if: env.NODE_AUTH_TOKEN != ''
         run: npm ci
       - if: env.NODE_AUTH_TOKEN != ''
