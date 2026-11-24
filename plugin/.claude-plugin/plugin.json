@@ -1,6 +1,6 @@
 {
   "name": "pcgamingwiki",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Read-only PCGamingWiki data for Claude: game facts, save and config locations, cloud sync, feature tables and (with a bot password) Cargo queries.",
   "author": { "name": "Steven Demanett", "url": "https://github.com/scdemanett" },
   "homepage": "https://github.com/scdemanett/pcgamingwiki-mcp",

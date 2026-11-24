@@ -62,7 +62,7 @@ It shows the settings dialog when you install; change them later with `/plugin c
 2. Open it, or drag it onto Claude Desktop's Settings → Extensions page, and click **Install**.
 3. Fill in the settings. Change them later under Settings → Extensions → PCGamingWiki.
 
-Claude Desktop runs the extension with its own built-in Node.js, so you don't need to install anything else.
+Claude Desktop runs the extension with its own built-in Node.js, so you don't need to install anything else. It lists the extension as from an "Unknown developer" because the file isn't code-signed; that changes nothing about how it works.
 
 **From npm (Cursor, Codex, Lumo, other MCP clients, or setting it up by hand)**
 
@@ -137,6 +137,36 @@ In all of these, `cargo_query` uses `PCGW_BOT_USER` and `PCGW_BOT_PASSWORD` from
 
 **ChatGPT** can't run local MCP servers: it only connects to remote servers by HTTPS URL. This server doesn't offer that yet.
 
+### Updating and removing
+
+- **Plugin:** run `/plugin marketplace update pcgamingwiki-mcp` to fetch new versions, or turn on auto-update for the marketplace in `/plugin`. Remove it with `/plugin uninstall pcgamingwiki@pcgamingwiki-mcp`.
+- **Extension:** install the newer `.mcpb` from the releases page over the old one. Remove it under Settings → Extensions.
+- **npm:** `npx -y pcgamingwiki-mcp` always runs the latest version.
+
+A saved login (`pcgamingwiki-mcp login`) lives in your user config folder and survives updates; `pcgamingwiki-mcp logout` deletes it.
+
+## Using it
+
+Ask Claude about PC games in plain language; it picks the tools. Some things to try:
+
+- "Where does Hollow Knight keep its saves on Linux?"
+- "Does Elden Ring support ultrawide, and is its frame rate capped?"
+- "Which DRM and stores does Stardew Valley have, and does it sync saves through Steam Cloud?"
+- "Show me the Issues fixed section for Fallout: New Vegas."
+- "What's the PCGamingWiki page for Steam app 1245620?"
+
+With a bot password, `cargo_query` can answer questions across many games, up to 50 rows at a time:
+
+- "Use cargo_query to list games where the Video table's 120_FPS is false." (`tables`: `Video`, `fields`: `_pageName=Game, 60_FPS, 120_FPS`, `where`: `120_FPS = "false"`)
+- "Which games use Unreal Engine 4 and support Vulkan?"
+
+Tips:
+
+- Claude can resolve a game once (`resolve_game`) and reuse its page ID for every other tool. That's faster and saves requests.
+- Answers are cached for 24 hours, so asking several questions about one game usually costs one request.
+- If you ask for a lot at once and hit PCGamingWiki's rate limit, tools return `rate_limited` with how many seconds to wait (about a minute). Nothing is retried behind your back.
+- Every answer carries the article's URL and an attribution line. Keep it when you share what you found: the data is CC BY-NC-SA 3.0.
+
 ## Configuration
 
 | Variable | Default | Meaning |
@@ -152,6 +182,7 @@ In all of these, `cargo_query` uses `PCGW_BOT_USER` and `PCGW_BOT_PASSWORD` from
 ### Without a bot password (default)
 
 All tools except `cargo_query` work. They read each article's wikitext and parse its templates, so responses include the wiki's notes. Responses say `"mode": "wikitext"`.
+
 ### Logging in for `cargo_query` (optional)
 
 `cargo_query` answers questions across many games at once ("games whose frame rate is capped at 60", "RPGs released since 2020 with ultrawide support"). Since August 2026 PCGamingWiki only allows its Cargo query API to logged-in clients, so this one tool needs a PCGamingWiki bot password. Without one, it returns `auth_required` with these instructions, and every other tool works as usual.
@@ -199,7 +230,7 @@ npm run build
 
 When working against the live wiki by hand, keep at least 2 s between requests and save responses as test fixtures instead of fetching again. The design and its decisions are in [docs/SPEC.md](docs/SPEC.md).
 
-**Known gaps:** Cargo mode is tested only on synthetic responses so far. The structured fields differ a little between modes (notes and some extra fields only in wikitext mode; computed fields and future availability only in Cargo mode). See the spec for details.
+**Known gaps:** `cargo_query` has been tested against the live wiki, but the experimental `PCGW_PREFER_CARGO` mode for the per-game tools has only been tested on synthetic responses. The structured fields differ a little between modes (notes and some extra fields only in wikitext mode; computed fields and future availability only in Cargo mode). See the spec for details.
 
 ## Licence
 

@@ -1,6 +1,6 @@
 {
   "name": "pcgamingwiki-mcp",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Read-only MCP server for PCGamingWiki: game facts, save locations, feature tables. Code MIT; wiki data CC BY-NC-SA 3.0.",
   "license": "MIT",
   "author": "Steven Demanett",
